@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtcChinaBot", "BtcChinaBot\BtcChinaBot.csproj", "{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuobiBot", "HuobiBot\HuobiBot.csproj", "{6F9E7E0C-A16A-447C-B305-AA1D763F3224}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{2EEF9328-252F-4889-804D-E6071F1DA8F0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrakenBot", "KrakenBot\KrakenBot.csproj", "{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtcChinaBot.web", "BtcChinaBot.web\BtcChinaBot.web.csproj", "{75E310FA-5F7A-44CD-8383-1096B37078C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitfinexBot", "BitfinexBot\BitfinexBot.csproj", "{061C0116-3492-4C33-BE28-FA8F451B97A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RippleBot", "RippleBot\RippleBot.csproj", "{FAE93B2D-D772-40D6-AF66-73309494DE1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtcChinaBot", "BtcChinaBot\BtcChinaBot.csproj", "{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtceBot", "BtceBot\BtceBot.csproj", "{565245BA-5868-4C7A-8580-226B3B438FAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BtcChinaBot.web", "BtcChinaBot.web\BtcChinaBot.web.csproj", "{75E310FA-5F7A-44CD-8383-1096B37078C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{2EEF9328-252F-4889-804D-E6071F1DA8F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuobiBot", "HuobiBot\HuobiBot.csproj", "{6F9E7E0C-A16A-447C-B305-AA1D763F3224}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrakenBot", "KrakenBot\KrakenBot.csproj", "{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RippleBot", "RippleBot\RippleBot.csproj", "{FAE93B2D-D772-40D6-AF66-73309494DE1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,38 +25,38 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Release|Any CPU.Build.0 = Release|Any CPU
-		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{565245BA-5868-4C7A-8580-226B3B438FAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{565245BA-5868-4C7A-8580-226B3B438FAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{565245BA-5868-4C7A-8580-226B3B438FAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{565245BA-5868-4C7A-8580-226B3B438FAB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75E310FA-5F7A-44CD-8383-1096B37078C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{75E310FA-5F7A-44CD-8383-1096B37078C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75E310FA-5F7A-44CD-8383-1096B37078C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75E310FA-5F7A-44CD-8383-1096B37078C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{061C0116-3492-4C33-BE28-FA8F451B97A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9750DB3-A398-44DB-BFE0-A56BDBC5986B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{565245BA-5868-4C7A-8580-226B3B438FAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{565245BA-5868-4C7A-8580-226B3B438FAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{565245BA-5868-4C7A-8580-226B3B438FAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{565245BA-5868-4C7A-8580-226B3B438FAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EEF9328-252F-4889-804D-E6071F1DA8F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F9E7E0C-A16A-447C-B305-AA1D763F3224}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAF7ED45-7CE5-4CA0-B0E1-8F14CC84C670}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAE93B2D-D772-40D6-AF66-73309494DE1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

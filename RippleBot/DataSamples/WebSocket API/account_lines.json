@@ -1,0 +1,31 @@
+﻿{
+  "id": 2,
+  "status": "success",
+  "type": "response",
+  "result": {
+    "account": "rPvVZ7jE5QzkiUhHFxf6s4EanMRqzGC4bs",
+    "ledger_current_index": 11298209,
+    "lines": [
+      {
+        "account": "rMwjYedjc7qqtKYVLiAccJSmCwih4LnE2q",
+        "balance": "0",
+        "currency": "USD",
+        "limit": "1000000",
+        "limit_peer": "0",
+        "quality_in": 0,
+        "quality_out": 0
+      },
+      {
+        "account": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+        "balance": "0",
+        "currency": "USD",
+        "limit": "1000000000",
+        "limit_peer": "0",
+        "no_ripple": true,
+        "quality_in": 0,
+        "quality_out": 0
+      }
+    ],
+    "validated": false
+  }
+}

@@ -32,6 +32,9 @@ namespace RippleBot
                 case "cbt":
                     trader = new CrazyBuyerTrap(logger);
                     break;
+                case "arb":
+                    trader = new ArbitrageTrader(logger);
+                    break;
                 case "wss-ripplecn":
                     trader = new WideSpreadSeller(logger);
                     break;

@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 
 namespace RippleBot.Business
 {
+    //TODO: where is this used?!
     [DataContract]
     internal class BalancesResponse
     {

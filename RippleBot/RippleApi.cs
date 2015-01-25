@@ -90,6 +90,22 @@ namespace RippleBot
             return account.result.account_data.BalanceXrp;
         }
 
+        internal double GetBalance(string currencyCode)
+        {
+            var command = new AccountLinesRequest { account = _walletAddress };
+
+            var data = sendToRippleNet(Helpers.SerializeJson(command));
+
+            if (null == data)
+                return -1.0;
+
+            if (!checkError("GetBalance("+currencyCode+")", data))
+                return -1.0;
+
+            var account = Helpers.DeserializeJSON<AccountLinesResponse>(data);
+            return account.result.lines.Single(line => line.account == _issuerAddress && line.currency == currencyCode).Balance;
+        }
+
         internal Offer GetOrderInfo(int orderId)
         {
             var offerList = getActiveOrders();
@@ -161,7 +177,7 @@ namespace RippleBot
         internal int PlaceBuyOrder(double price, double amount)
         {
             long amountXrpDrops = (long) Math.Round(amount*1000000);
-            double amountUsd = price * amount;
+            double amountFiat = price * amount;
 
             var command = new CreateBuyOrderRequest
             {
@@ -171,7 +187,7 @@ namespace RippleBot
                     TakerGets = new Take
                     {
                         currency = _fiatCurreny,
-                        value = amountUsd.ToString("0.00000"),
+                        value = amountFiat.ToString("0.00000"),
                         issuer = _issuerAddress
                     },
                     TakerPays = amountXrpDrops.ToString()

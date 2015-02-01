@@ -53,27 +53,27 @@ namespace RippleBot.Business
             }
         }
 
-        private double _amountUsd;//TODO = -1.0;
-        internal double AmountUsd
+        private double _amount;//TODO = -1.0;
+        internal double Amount
         {
             get
             {
-                if (_amountUsd.eq(0.0))
+                if (_amount.eq(0.0))
                 {
                     var value = TradeType.BUY == Type
                         ? taker_gets.value
                         : taker_pays.value;
-                    _amountUsd = double.Parse(value);
+                    _amount = double.Parse(value);
                 }
 
-                return _amountUsd;
+                return _amount;
             }
         }
 
         /// <summary>Price of one XRP in USD</summary>
         internal double Price
         {
-            get { return AmountUsd / AmountXrp; }
+            get { return Amount / AmountXrp; }
         }
 
         /// <summary>Currency code for the fiat side of an offer</summary>

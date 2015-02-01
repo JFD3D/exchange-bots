@@ -19,6 +19,7 @@ namespace RippleBot
         private readonly string _arbGateway;
         private readonly double _parity;
         private const double _arbFactor = 1.0065;       //The price of arbitrage currency must be at least 0.65% higher than parity to buy
+        private const double _backFactor = 1.006;       //The price of basic currency must be at most 0.6% higher than parity to sell back
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 
         //TODO: find and incorporate gateway fees (RTJ has around 1%). Load from config.
@@ -68,12 +69,12 @@ namespace RippleBot
             log("Balances: {0:0.000} {1}; {2:0.000} {3}; {4:0.000} XRP", baseBalance, _baseCurrency, arbBalance, _arbCurrency, xrpBalance);
 
             var lowestBaseAskPrice = baseMarket.Asks[0].Price;
-            var highestBaseBidPrice = arbMarket.Bids[0].Price;
-            double baseRatio = highestBaseBidPrice / lowestBaseAskPrice;
+            var highestArbBidPrice = arbMarket.Bids[0].Price;
+            double baseRatio = highestArbBidPrice / lowestBaseAskPrice;
 
             var lowestArbAskPrice = arbMarket.Asks[0].Price;
-            var highestArbBidPrice = baseMarket.Bids[0].Price;
-            var arbRatio = lowestArbAskPrice / highestArbBidPrice;
+            var highestBaseBidPrice = baseMarket.Bids[0].Price;
+            var arbRatio = lowestArbAskPrice / highestBaseBidPrice;
 
             log("BASIC ratio={0:0.00000}; ARB ratio={1:0.00000}", baseRatio, arbRatio);
 
@@ -95,15 +96,17 @@ namespace RippleBot
                         //Try to buy XRP for BASIC
                         var amount = Math.Min(baseVolume, arbVolume);
                         int orderId = _baseRequestor.PlaceBuyOrder(lowestBaseAskPrice + 0.000002, amount);
-                        log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", ConsoleColor.Cyan, amount, lowestBaseAskPrice, _baseCurrency, orderId);
+                        log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestBaseAskPrice, _baseCurrency, orderId);
                         var orderInfo = _baseRequestor.GetOrderInfo(orderId);
 
                         if (orderInfo.Closed)
                         {
-                            log("Buy XRP orderID={0} filled OK", ConsoleColor.Green, orderId);
+                            var newXrpBalance = _baseRequestor.GetXrpBalance();
+                            amount = newXrpBalance - xrpBalance;
+                            log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                             //Try to sell XRP for ARB
                             var arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBidPrice - 0.000002, ref amount);
-                            log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", ConsoleColor.Cyan, amount, highestArbBidPrice, _arbCurrency, arbBuyOrderId);
+                            log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestArbBidPrice, _arbCurrency, arbBuyOrderId);
                             var arbBuyOrderInfo = _arbRequestor.GetOrderInfo(arbBuyOrderId);
                             if (arbBuyOrderInfo.Closed)
                             {
@@ -128,7 +131,7 @@ namespace RippleBot
 
             if (arbBalance >= 0.1)
             {
-                if (arbRatio < _parity)
+                if (arbRatio < _parity * _backFactor)
                 {
                     log("Chance to sell {0} for {1}", ConsoleColor.Cyan, _arbCurrency, _baseCurrency);
                     var arbVolume = arbMarket.Asks[0].Amount;
@@ -138,7 +141,37 @@ namespace RippleBot
                     else
                     {
                         //Try to buy XRP for ARB
-                        log("TODO: try to buy XRP for ARB", ConsoleColor.Red);
+                        var amount = Math.Min(baseVolume, arbVolume);
+                        int orderId = _arbRequestor.PlaceBuyOrder(lowestArbAskPrice + 0.000002, amount);
+                        log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestArbAskPrice, _arbCurrency, orderId);
+                        var orderInfo = _arbRequestor.GetOrderInfo(orderId);
+
+                        if (orderInfo.Closed)
+                        {
+                            var newXrpBalance = _arbRequestor.GetXrpBalance();
+                            amount = newXrpBalance - xrpBalance;
+                            log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
+                            //Try to sell XRP for BASIC
+                            var baseBuyOrderId = _baseRequestor.PlaceSellOrder(highestBaseBidPrice - 0.000002, ref amount);
+                            log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestBaseBidPrice, _baseCurrency, baseBuyOrderId);
+                            var baseBuyOrderInfo = _baseRequestor.GetOrderInfo(baseBuyOrderId);
+                            if (baseBuyOrderInfo.Closed)
+                            {
+                                log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _baseCurrency, orderId);
+                                log("{0} -> {1} ARBITRAGE SUCCEEDED!", ConsoleColor.Green, _arbCurrency, _baseCurrency);
+                            }
+                            else
+                            {
+                                log("OrderID={0} (sell {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
+                                    baseBuyOrderId, baseBuyOrderInfo.AmountXrp, baseBuyOrderInfo.Price, _baseCurrency);
+                                //NOTE: If it's closed later, the arbitrage is just successfully finished silently
+                            }
+                        }
+                        else    //TODO: handle partially filled offer somehow? Q: And what if it's closed later? must finish the sell-XRP-for-ARB somewhere
+                        {
+                            log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
+                                orderId, orderInfo.AmountXrp, orderInfo.Price, _arbCurrency);
+                        }
                     }
                 }
             }

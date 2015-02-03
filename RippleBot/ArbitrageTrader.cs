@@ -104,6 +104,7 @@ namespace RippleBot
                             var newXrpBalance = _baseRequestor.GetXrpBalance();
                             amount = newXrpBalance - xrpBalance;
                             log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
+                            amount -= 0.048;    //So we don't fall into "lack of funds" due to fees
                             //Try to sell XRP for ARB
                             var arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBidPrice - 0.000002, ref amount);
                             log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestArbBidPrice, _arbCurrency, arbBuyOrderId);

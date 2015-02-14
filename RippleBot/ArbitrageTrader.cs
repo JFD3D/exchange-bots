@@ -22,6 +22,9 @@ namespace RippleBot
         private const double _backFactor = 1.006;       //The price of basic currency must be at most 0.6% higher than parity to sell back
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 
+        private const int ZOMBIE_CHECK = 10;            //Check for dangling orders to cancel every 10th round
+        private int _counter;
+
         //TODO: find and incorporate gateway fees (RTJ has around 1%). Load from config.
         private double _baseFeeFactor = 0.0;
         private double _arbFeeFactor = 0.00;    //0%
@@ -86,7 +89,7 @@ namespace RippleBot
             {
                 if (baseRatio > _parity * _arbFactor)
                 {
-                    log("Chance to buy cheap {0}", ConsoleColor.Cyan, _arbCurrency);
+                    log("Chance to buy cheap {0} (BASIC ratio {1:0.00000} > {2:0.00000})", ConsoleColor.Cyan, _arbCurrency, baseRatio, _parity*_arbFactor);
                     var baseVolume = baseMarket.Asks[0].Amount;
                     var arbVolume = arbMarket.Bids[0].Amount;
                     if (baseVolume < MIN_TRADE_VOLUME || arbVolume < MIN_TRADE_VOLUME)
@@ -111,7 +114,7 @@ namespace RippleBot
                             var arbBuyOrderInfo = _arbRequestor.GetOrderInfo(arbBuyOrderId);
                             if (arbBuyOrderInfo.Closed)
                             {
-                                log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _arbCurrency, orderId);
+                                log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _arbCurrency, arbBuyOrderId);
                                 log("{0} -> {1} ARBITRAGE SUCCEEDED!", ConsoleColor.Green, _baseCurrency, _arbCurrency);
                             }
                             else
@@ -134,7 +137,8 @@ namespace RippleBot
             {
                 if (arbRatio < _parity * _backFactor)
                 {
-                    log("Chance to sell {0} for {1}", ConsoleColor.Cyan, _arbCurrency, _baseCurrency);
+                    log("Chance to sell {0} for {1} (ARB ratio {2:0.00000} > {3:0.00000})", ConsoleColor.Cyan,
+                        _arbCurrency, _baseCurrency, arbRatio, _parity*_backFactor);
                     var arbVolume = arbMarket.Asks[0].Amount;
                     var baseVolume = baseMarket.Bids[0].Amount;
                     if (arbVolume < MIN_TRADE_VOLUME || baseVolume < MIN_TRADE_VOLUME)
@@ -158,7 +162,7 @@ namespace RippleBot
                             var baseBuyOrderInfo = _baseRequestor.GetOrderInfo(baseBuyOrderId);
                             if (baseBuyOrderInfo.Closed)
                             {
-                                log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _baseCurrency, orderId);
+                                log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _baseCurrency, baseBuyOrderId);
                                 log("{0} -> {1} ARBITRAGE SUCCEEDED!", ConsoleColor.Green, _arbCurrency, _baseCurrency);
                             }
                             else
@@ -175,6 +179,12 @@ namespace RippleBot
                         }
                     }
                 }
+            }
+
+            if (_counter++ == ZOMBIE_CHECK)
+            {
+                _counter = 0;
+                _baseRequestor.CleanupZombies(-1, -1);
             }
 
             log(new string('=', 84));

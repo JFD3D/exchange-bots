@@ -19,7 +19,7 @@ namespace RippleBot.Business
         {
             get
             {
-                if (8 == error_code)        //"tooBusy"
+                if (8 == error_code || 9 == error_code)        //"tooBusy"
                     return false;
                 if ("noNetwork" == error)   //"Ripple not synced to Ripple Network"
                     return false;

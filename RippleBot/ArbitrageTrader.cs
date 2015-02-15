@@ -18,7 +18,7 @@ namespace RippleBot
         private readonly string _baseGateway;
         private readonly string _arbGateway;
         private readonly double _parity;
-        private const double _arbFactor = 1.0065;       //The price of arbitrage currency must be at least 0.65% higher than parity to buy
+        private const double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
         private const double _backFactor = 1.006;       //The price of basic currency must be at most 0.6% higher than parity to sell back
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 

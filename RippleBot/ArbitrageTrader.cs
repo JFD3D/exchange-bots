@@ -18,11 +18,10 @@ namespace RippleBot
         private readonly string _baseGateway;
         private readonly string _arbGateway;
         private readonly double _parity;
-        private const double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
-        private const double _backFactor = 1.006;       //The price of basic currency must be at most 0.6% higher than parity to sell back
+        private const double _arbFactor = 1.003;        //The price of arbitrage currency must be at least 0.3% higher than parity to buy
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 
-        private const int ZOMBIE_CHECK = 10;            //Check for dangling orders to cancel every 10th round
+        private const int ZOMBIE_CHECK = 12;            //Check for dangling orders to cancel every 12th round
         private int _counter;
 
         //TODO: find and incorporate gateway fees (RTJ has around 1%). Load from config.
@@ -135,10 +134,9 @@ namespace RippleBot
 
             if (arbBalance >= 0.1)
             {
-                if (arbRatio < _parity * _backFactor)
+                if (arbRatio < _parity)
                 {
-                    log("Chance to sell {0} for {1} (ARB ratio {2:0.00000} > {3:0.00000})", ConsoleColor.Cyan,
-                        _arbCurrency, _baseCurrency, arbRatio, _parity*_backFactor);
+                    log("Chance to sell {0} for {1} (ARB ratio {2:0.00000} < {3:0.00000})", ConsoleColor.Cyan, _arbCurrency, _baseCurrency, arbRatio, _parity);
                     var arbVolume = arbMarket.Asks[0].Amount;
                     var baseVolume = baseMarket.Bids[0].Amount;
                     if (arbVolume < MIN_TRADE_VOLUME || baseVolume < MIN_TRADE_VOLUME)
@@ -181,7 +179,7 @@ namespace RippleBot
                 }
             }
 
-            if (_counter++ == ZOMBIE_CHECK)
+            if (++_counter == ZOMBIE_CHECK)
             {
                 _counter = 0;
                 _baseRequestor.CleanupZombies(-1, -1);

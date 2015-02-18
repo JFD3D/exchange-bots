@@ -103,7 +103,11 @@ namespace RippleBot
                 return -1.0;
 
             var account = Helpers.DeserializeJSON<AccountLinesResponse>(data);
-            return account.result.lines.Single(line => line.account == _issuerAddress && line.currency == currencyCode).Balance;
+            var theLine = account.result.lines.SingleOrDefault(line => line.account == _issuerAddress && line.currency == currencyCode);
+            if (null == theLine)
+                return -1.0;
+
+            return theLine.Balance;
         }
 
         internal Offer GetOrderInfo(int orderId)

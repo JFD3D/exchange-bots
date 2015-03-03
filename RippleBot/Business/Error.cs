@@ -21,7 +21,7 @@ namespace RippleBot.Business
             {
                 if (8 == error_code || 9 == error_code)        //"tooBusy"
                     return false;
-                if ("noNetwork" == error)   //"Ripple not synced to Ripple Network"
+                if ("noNetwork" == error || 6 == error_code)   //"Ripple not synced to Ripple Network"
                     return false;
                 if ("highFee" == error)     //"Fee of 123 exceeds the requested tx limit 100". Unexplained error, need to do some research. So far try to resolve by ignoring.
                     return false;

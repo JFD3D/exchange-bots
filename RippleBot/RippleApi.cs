@@ -103,6 +103,9 @@ namespace RippleBot
                 return -1.0;
 
             var account = Helpers.DeserializeJSON<AccountLinesResponse>(data);
+            if (null == account.result.lines)
+                return -1.0;
+
             var theLine = account.result.lines.SingleOrDefault(line => line.account == _issuerAddress && line.currency == currencyCode);
             if (null == theLine)
                 return -1.0;

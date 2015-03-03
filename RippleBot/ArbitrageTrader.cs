@@ -88,6 +88,12 @@ namespace RippleBot
             {
                 if (baseRatio > _parity * _arbFactor)
                 {
+                    if (baseRatio > _parity * 1.1 || baseRatio < _parity * 0.9)
+                    {
+                        log("BASIC ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow);
+                        return;
+                    }
+
                     log("Chance to buy cheap {0} (BASIC ratio {1:0.00000} > {2:0.00000})", ConsoleColor.Cyan, _arbCurrency, baseRatio, _parity*_arbFactor);
                     var baseVolume = baseMarket.Asks[0].Amount;
                     var arbVolume = arbMarket.Bids[0].Amount;
@@ -108,7 +114,7 @@ namespace RippleBot
                             log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                             amount -= 0.048;    //So we don't fall into "lack of funds" due to fees
                             //Try to sell XRP for ARB
-                            var arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBidPrice - 0.00001, ref amount);
+                            var arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBidPrice * 0.9, ref amount);     //price*0.9 basically does market order
                             log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestArbBidPrice, _arbCurrency, arbBuyOrderId);
                             var arbBuyOrderInfo = _arbRequestor.GetOrderInfo(arbBuyOrderId);
                             if (null != arbBuyOrderInfo && arbBuyOrderInfo.Closed)
@@ -123,10 +129,13 @@ namespace RippleBot
                                 //NOTE: If it's closed later, the arbitrage is just successfully finished silently
                             }
                         }
-                        else    //TODO: handle partially filled offer somehow? Q: And what if it's closed later? must finish the sell-XRP-for-ARB somewhere
+                        else
                         {
                             log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
                                 orderId, orderInfo.AmountXrp, orderInfo.Price, _baseCurrency);
+                            if (_baseRequestor.CancelOrder(orderId))
+                                log("...success", ConsoleColor.Cyan);
+                            else log("...failed", ConsoleColor.Cyan);
                         }
                     }
                 }
@@ -136,6 +145,12 @@ namespace RippleBot
             {
                 if (arbRatio < _parity)
                 {
+                    if (arbRatio > _parity * 1.1 || arbRatio < _parity * 0.9)
+                    {
+                        log("ARB ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow);
+                        return;
+                    }
+
                     log("Chance to sell {0} for {1} (ARB ratio {2:0.00000} < {3:0.00000})", ConsoleColor.Cyan, _arbCurrency, _baseCurrency, arbRatio, _parity);
                     var arbVolume = arbMarket.Asks[0].Amount;
                     var baseVolume = baseMarket.Bids[0].Amount;
@@ -155,7 +170,7 @@ namespace RippleBot
                             amount = newXrpBalance - xrpBalance;
                             log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                             //Try to sell XRP for BASIC
-                            var baseBuyOrderId = _baseRequestor.PlaceSellOrder(highestBaseBidPrice - 0.00001, ref amount);
+                            var baseBuyOrderId = _baseRequestor.PlaceSellOrder(highestBaseBidPrice * 0.9, ref amount);      //price*0.9 basically does market order
                             log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestBaseBidPrice, _baseCurrency, baseBuyOrderId);
                             var baseBuyOrderInfo = _baseRequestor.GetOrderInfo(baseBuyOrderId);
                             if (null != baseBuyOrderInfo && baseBuyOrderInfo.Closed)
@@ -170,10 +185,13 @@ namespace RippleBot
                                 //NOTE: If it's closed later, the arbitrage is just successfully finished silently
                             }
                         }
-                        else    //TODO: handle partially filled offer somehow? Q: And what if it's closed later? must finish the sell-XRP-for-ARB somewhere
+                        else
                         {
-                            log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
+                            log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
                                 orderId, orderInfo.AmountXrp, orderInfo.Price, _arbCurrency);
+                            if (_arbRequestor.CancelOrder(orderId))
+                                log("...success", ConsoleColor.Cyan);
+                            else log("...failed", ConsoleColor.Cyan);
                         }
                     }
                 }

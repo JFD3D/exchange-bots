@@ -87,6 +87,9 @@ namespace RippleBot
                 return -1.0;
 
             var account = Helpers.DeserializeJSON<AccountInfoResponse>(data);
+            if (null == account.result || null == account.result.account_data)
+                return -1.0;
+
             return account.result.account_data.BalanceXrp;
         }
 

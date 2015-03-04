@@ -24,6 +24,9 @@ namespace RippleBot
         private const int ZOMBIE_CHECK = 12;            //Check for dangling orders to cancel every 12th round
         private int _counter;
 
+        //I need to watch XRP balance to revert filled abandoned fiat->XRP orders
+        private double _lastXrpBalance = -1.0;
+
         //TODO: find and incorporate gateway fees (RTJ has around 1%). Load from config.
         private double _baseFeeFactor = 0.0;
         private double _arbFeeFactor = 0.00;    //0%
@@ -131,10 +134,10 @@ namespace RippleBot
                         }
                         else
                         {
-                            log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
+                            log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
                                 orderId, orderInfo.AmountXrp, orderInfo.Price, _baseCurrency);
                             if (_baseRequestor.CancelOrder(orderId))
-                                log("...success", ConsoleColor.Cyan);
+                                log("...success?", ConsoleColor.Cyan);
                             else log("...failed", ConsoleColor.Cyan);
                         }
                     }
@@ -190,18 +193,44 @@ namespace RippleBot
                             log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
                                 orderId, orderInfo.AmountXrp, orderInfo.Price, _arbCurrency);
                             if (_arbRequestor.CancelOrder(orderId))
-                                log("...success", ConsoleColor.Cyan);
+                                log("...success?", ConsoleColor.Cyan);
                             else log("...failed", ConsoleColor.Cyan);
                         }
                     }
                 }
             }
 
+            //Clear any dangling orders
             if (++_counter == ZOMBIE_CHECK)
             {
                 _counter = 0;
                 _baseRequestor.CleanupZombies(-1, -1);
             }
+
+            //Change any extra XRP balance to a fiat
+            if (_lastXrpBalance > 0.0 && xrpBalance - 2.0 > _lastXrpBalance)
+            {
+                log("Balance {0:0.000} is too high. Must convert to fiat.", ConsoleColor.Yellow);
+                var amount = xrpBalance - _lastXrpBalance;
+                //Check which fiat is better now
+                if (baseRatio > _parity * _arbFactor)
+                {
+                    log("Converting to {0}", _arbCurrency);
+                    var orderId = _arbRequestor.PlaceSellOrder(highestArbBidPrice * 0.9, ref amount);
+                }
+                else if (arbRatio < _parity)
+                {
+                    log("Converting to {0}", _baseCurrency);
+                    var orderId = _baseRequestor.PlaceSellOrder(highestBaseBidPrice * 0.9, ref amount);
+                }
+                else
+                {
+                    //Very rare, but we're in between. Leave _lastXrpBalance be for now.
+                    log("No fiat is favourable now. Waiting.");
+                }
+            }
+            else
+                _lastXrpBalance = xrpBalance;
 
             log(new string('=', 84));
         }

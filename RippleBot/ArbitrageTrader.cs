@@ -18,7 +18,7 @@ namespace RippleBot
         private readonly string _baseGateway;
         private readonly string _arbGateway;
         private readonly double _parity;
-        private const double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
+        private readonly double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 
         private const int ZOMBIE_CHECK = 12;            //Check for dangling orders to cancel every 12th round
@@ -46,13 +46,14 @@ namespace RippleBot
             _arbGateway = Configuration.GetValue("arbitrage_gateway_address");
 
             _parity = double.Parse(Configuration.GetValue("parity_ratio"));
+            _arbFactor = double.Parse(Configuration.GetValue("profit_factor"));
             _intervalMs = 8000;
 
             _baseRequestor = new RippleApi(logger, _baseGateway, _baseCurrency);
             _baseRequestor.Init();
             _arbRequestor = new RippleApi(logger, _arbGateway, _arbCurrency);
             _arbRequestor.Init();
-            log("Arbitrage trader started for currencies {0}, {1} with parity {2:0.000}", _baseCurrency, _arbCurrency, _parity);
+            log("Arbitrage trader started for currencies {0}, {1} with parity={2:0.000};profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
         }
 
 
@@ -210,8 +211,9 @@ namespace RippleBot
             //Change any extra XRP balance to a fiat
             if (_lastXrpBalance > 0.0 && xrpBalance - 2.0 > _lastXrpBalance)
             {
-                log("Balance {0:0.000} is too high. Must convert to fiat.", ConsoleColor.Yellow);
                 var amount = xrpBalance - _lastXrpBalance;
+                log("Balance {0:0.000} XRP is too high. Must convert {1:0.000} to fiat.", ConsoleColor.Yellow, xrpBalance, amount);
+
                 //Check which fiat is better now
                 if (baseRatio > _parity * _arbFactor)
                 {

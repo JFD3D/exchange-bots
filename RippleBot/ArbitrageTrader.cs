@@ -61,12 +61,12 @@ namespace RippleBot
         {
             var baseMarket = _baseRequestor.GetMarketDepth();
 
-            if (null == baseMarket)
+            if (null == baseMarket || null == baseMarket.Asks || null == baseMarket.Bids)
                 return;
 
             var arbMarket = _arbRequestor.GetMarketDepth();
 
-            if (null == arbMarket)
+            if (null == arbMarket || null == arbMarket.Asks || null == arbMarket.Bids)
                 return;
 
             var baseBalance = _baseRequestor.GetBalance(_baseCurrency);
@@ -94,7 +94,7 @@ namespace RippleBot
                 {
                     if (baseRatio > _parity * 1.1 || baseRatio < _parity * 0.9)
                     {
-                        log("BASIC ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow);
+                        log("BASIC ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow, baseRatio);
                         return;
                     }
 
@@ -151,7 +151,7 @@ namespace RippleBot
                 {
                     if (arbRatio > _parity * 1.1 || arbRatio < _parity * 0.9)
                     {
-                        log("ARB ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow);
+                        log("ARB ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow, arbRatio);
                         return;
                     }
 
@@ -208,7 +208,7 @@ namespace RippleBot
                 _baseRequestor.CleanupZombies(-1, -1);
             }
 
-            //Change any extra XRP balance to a fiat
+            //Change any extra XRP balance to a fiat. Any conversion is better than staying in XRP and potential loss of value.
             if (_lastXrpBalance > 0.0 && xrpBalance - 2.0 > _lastXrpBalance)
             {
                 var amount = xrpBalance - _lastXrpBalance;
@@ -227,14 +227,25 @@ namespace RippleBot
                 }
                 else
                 {
-                    //Very rare, but we're in between. Leave _lastXrpBalance be for now.
-                    log("No fiat is favourable now. Waiting.");
+                    double baseDiffFromSell = (_parity * _arbFactor) - baseRatio;
+                    double arbDiffFromBuyback = arbRatio - _parity;
+
+                    if (baseDiffFromSell < arbDiffFromBuyback)
+                    {
+                        log("Better converting to {0}", _arbCurrency);
+                        var orderId = _arbRequestor.PlaceSellOrder(highestArbBidPrice * 0.9, ref amount);
+                    }
+                    else
+                    {
+                        log("Bettger converting to {0}", _baseCurrency);
+                        var orderId = _baseRequestor.PlaceSellOrder(highestBaseBidPrice * 0.9, ref amount);
+                    }
                 }
             }
             else
                 _lastXrpBalance = xrpBalance;
 
-            log(new string('=', 84));
+            log(new string('=', 70));
         }
     }
 }

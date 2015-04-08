@@ -267,10 +267,15 @@ namespace RippleBot
             return orderId;
         }
 
-        internal int PlaceSellOrder(double price, ref double amount)
+        internal int PlaceSellOrder(double price, ref double amountXrp)
         {
-            long amountXrpDrops = (long) Math.Round(amount*1000000);
-            double amountUsd = price * amount;
+            double amountFiat = price * amountXrp;
+            return placeSellOrder(amountFiat, ref amountXrp);
+        }
+
+        private int placeSellOrder(double amountFiat, ref double amountXrp)
+        {
+            long amountXrpDrops = (long) Math.Round(amountXrp*1000000);
 
             var command = new CreateSellOrderRequest
             {
@@ -280,7 +285,7 @@ namespace RippleBot
                     TakerPays = new Take
                     {
                         currency = _fiatCurreny,
-                        value = amountUsd.ToString("0.00000"),
+                        value = amountFiat.ToString("0.00000"),
                         issuer = _issuerAddress
                     },
                     TakerGets = amountXrpDrops.ToString()
@@ -486,7 +491,23 @@ namespace RippleBot
 
         private string sendToRippleNet(string commandData)
         {
-            _webSocket.Send(commandData);
+            try
+            {
+                _webSocket.Send(commandData);
+            }
+            catch (Exception ex)
+            {
+                _logger.AppendMessage("Exception while sending data to socket: " + ex.Message, true, ConsoleColor.Magenta);
+                if (ex.Message.Contains("The socket is not connected!"))
+                {
+                    //Try to resolve the connection problem; wait a while and re-open socket
+                    const int sleepTimeMs = 60*1000;
+                    _logger.AppendMessage("Sleep for " + sleepTimeMs + " ms, then try to reconect", true, ConsoleColor.Yellow);
+                    Thread.Sleep(sleepTimeMs);
+                    _webSocket.Close();
+                }
+                else throw;
+            }
 
             if (!_open)
                 throw new InvalidOperationException("WebSocket not open");

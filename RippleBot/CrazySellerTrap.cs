@@ -27,6 +27,9 @@ namespace RippleBot
         private const double MIN_ORDER_AMOUNT = 0.5;
         private readonly string _currencyCode;
 
+        private const int ZOMBIE_CHECK = 10;            //Check for dangling orders to cancel every 10th round
+        private int _counter;
+
         //Active BUY order ID
         private int _buyOrderId = -1;
         //Active BUY order amount
@@ -276,8 +279,11 @@ namespace RippleBot
                 }
             }
 
-            if (_cleanup)
+            if (_cleanup && ++_counter == ZOMBIE_CHECK)
+            {
+                _counter = 0;
                 _requestor.CleanupZombies(_buyOrderId, _sellOrderId);
+            }
 
             _xrpBalance = _requestor.GetXrpBalance();
             log("### Balance= {0} XRP", _xrpBalance);

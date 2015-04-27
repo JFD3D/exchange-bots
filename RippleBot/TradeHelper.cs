@@ -24,7 +24,7 @@ namespace RippleBot
                 return 0.0f;
 
             //Last candle has just been open, merge it with previous
-            if (last5mCandle.partial && last5mCandle.StartTime > DateTime.Now.Subtract(new TimeSpan(0, 2, 0)))
+            if (last5mCandle.IsPartial)
             {
                 if (candles.Count > 1)
                 {

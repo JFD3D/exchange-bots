@@ -25,7 +25,7 @@ namespace RippleBot
         private int _counter;
 
         //I need to watch XRP balance to revert filled abandoned fiat->XRP orders
-        private double _lastXrpBalance = -1.0;
+        private double _lastValidXrpBalance = -1.0;
 
         //TODO: find and incorporate gateway fees (RTJ has around 1%). Load from config.
         private double _baseFeeFactor = 0.0;
@@ -53,7 +53,7 @@ namespace RippleBot
             _baseRequestor.Init();
             _arbRequestor = new RippleApi(logger, _arbGateway, _arbCurrency);
             _arbRequestor.Init();
-            log("Arbitrage trader started for currencies {0}, {1} with parity={2:0.000};profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
+            log("Arbitrage trader started for currencies {0}, {1} with parity={2:0.000}; profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
         }
 
 
@@ -209,9 +209,9 @@ namespace RippleBot
             }
 
             //Change any extra XRP balance to a fiat
-            if (_lastXrpBalance > 0.0 && xrpBalance - 2.0 > _lastXrpBalance)
+            if (_lastValidXrpBalance > 0.0 && xrpBalance - 2.0 > _lastValidXrpBalance)
             {
-                var amount = xrpBalance - _lastXrpBalance;
+                var amount = xrpBalance - _lastValidXrpBalance;
                 log("Balance {0:0.000} XRP is too high. Must convert {1:0.000} to fiat.", ConsoleColor.Yellow, xrpBalance, amount);
 
                 //Check which fiat is better now
@@ -231,8 +231,8 @@ namespace RippleBot
                     log("No fiat is favourable now. Waiting.");
                 }
             }
-            else
-                _lastXrpBalance = xrpBalance;
+            else if (xrpBalance > -1.0)
+                _lastValidXrpBalance = xrpBalance;
 
             log(new string('=', 84));
         }

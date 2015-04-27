@@ -441,7 +441,7 @@ namespace RippleBot
         internal void CleanupZombies(int buyOrderId, int sellOrderId)
         {
             var offerList = getActiveOrders();
-            if (null == offerList)
+            if (null == offerList || null == offerList.result)
                 return;
 
             foreach (var offer in offerList.result.offers)

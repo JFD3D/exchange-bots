@@ -18,28 +18,31 @@ namespace RippleBot.Business.DataApi
     }
 
     [DataContract]
-    internal class CandlesResponse
-    {
-        [DataMember] internal string startTime { get; set; }
-        [DataMember] internal string endTime { get; set; }
-        [DataMember] internal Base @base { get; set; }
-        [DataMember] internal Counter counter { get; set; }
-        [DataMember] internal string timeIncrement { get; set; }
-        [DataMember] internal int timeMultiple { get; set; }
-        [DataMember] internal List<Candle> results { get; set; }
-    }
-
-    [DataContract]
     internal class Base
     {
-        [DataMember] internal string currency { get; set; }
+        [DataMember]
+        internal string currency { get; set; }
     }
 
     [DataContract]
     internal class Counter
     {
-        [DataMember] internal string currency { get; set; }
-        [DataMember] internal string issuer { get; set; }
+        [DataMember]
+        internal string currency { get; set; }
+        [DataMember]
+        internal string issuer { get; set; }
+    }
+
+
+    [DataContract]
+    internal class CandlesResponse
+    {
+        [DataMember] internal string startTime { get; set; }
+        [DataMember] internal string endTime { get; set; }
+        [DataMember] internal string @base { get; set; }
+        [DataMember] internal string counter { get; set; }
+        [DataMember] internal string timeIncrement { get; set; }
+        [DataMember] internal List<Candle> results { get; set; }
     }
 
     [DataContract]
@@ -56,11 +59,18 @@ namespace RippleBot.Business.DataApi
         [DataMember] internal double low { get; set; }
         [DataMember] internal double close { get; set; }
         [DataMember] internal double vwap { get; set; }
-        [DataMember] internal bool partial { get; set; }
 
         internal DateTime StartTime
         {
             get { return DateTime.Parse(startTime); }
+        }
+
+        internal bool IsPartial
+        {
+            get
+            {
+                return StartTime > DateTime.Now.Subtract(new TimeSpan(0, 2, 0));
+            }
         }
     }
 }

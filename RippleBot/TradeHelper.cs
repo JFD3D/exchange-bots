@@ -13,8 +13,8 @@ namespace RippleBot
         /// <returns>Coeficient in [0.0, 1.0] where 0.0 means totally peacefull market, 1.0 is wild.</returns>
         internal static float GetMadness(List<Candle> candles)
         {
-            //No recent trading at all
-            if (!candles.Any())
+            //Bad response or no recent trading
+            if (null == candles || !candles.Any())
                 return 0.0f;
 
             var last5mCandle = candles.Last();

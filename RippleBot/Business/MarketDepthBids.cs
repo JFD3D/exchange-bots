@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Common.Business;
 
@@ -47,6 +48,9 @@ namespace RippleBot.Business
         {
             get
             {
+                if (null == TakerPays)
+                    return 0.0;
+
                 return double.Parse(TakerPays) / Const.DROPS_IN_XRP;
             }
         }
@@ -56,6 +60,9 @@ namespace RippleBot.Business
         {
             get
             {
+                if (null == TakerGets || String.IsNullOrEmpty(TakerGets.value))
+                    return 0.0;         //TODO: INVESTIGATE IMPACT!
+
                 var dollars = double.Parse(TakerGets.value);
                 return dollars / Amount;
             }

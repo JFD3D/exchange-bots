@@ -92,7 +92,7 @@ namespace RippleBot
             {
                 if (baseRatio > _parity * _arbFactor)
                 {
-                    if (baseRatio > _parity * 1.1 || baseRatio < _parity * 0.9)
+                    if (baseRatio > _parity * 1.15 || baseRatio < _parity * 0.9)
                     {
                         log("BASIC ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow, baseRatio);
                         return;
@@ -149,7 +149,7 @@ namespace RippleBot
             {
                 if (arbRatio < _parity)
                 {
-                    if (arbRatio > _parity * 1.1 || arbRatio < _parity * 0.9)
+                    if (arbRatio > _parity * 1.15 || arbRatio < _parity * 0.9)
                     {
                         log("ARB ratio has suspicious value {0:0.00000}. Let's leave it be", ConsoleColor.Yellow, arbRatio);
                         return;

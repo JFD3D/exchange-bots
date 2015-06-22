@@ -6,6 +6,7 @@ namespace Common
 {
     public abstract class TraderBase : ITrader
     {
+        private int ERROR_RECOVERY_BREAK = 10 * 60 * 1000;        //10min after fatal exception to revive
         private bool _killSignal;
         private readonly bool _verbose = true;
         private readonly Logger _logger;
@@ -33,7 +34,9 @@ namespace Common
                     log("ERROR: " + ex.Message + Environment.NewLine + ex.StackTrace);
                     _logger.AppendMessage(Environment.NewLine + "Last response:" + Environment.NewLine + _logger.LastResponse + Environment.NewLine,
                                           true, ConsoleColor.Cyan);
-                    throw;
+//                    throw;
+                    Thread.Sleep(ERROR_RECOVERY_BREAK);
+                    log("Resurrected after " + ERROR_RECOVERY_BREAK + "ms, let's try again.", ConsoleColor.Magenta);
                 }
             } while (!_killSignal);
         }

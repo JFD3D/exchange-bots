@@ -9,7 +9,7 @@ namespace Common
         private int ERROR_RECOVERY_BREAK = 10 * 60 * 1000;        //10min after fatal exception to revive
         private bool _killSignal;
         private readonly bool _verbose = true;
-        private readonly Logger _logger;
+        protected readonly Logger _logger;
         protected int _intervalMs;
         protected bool _cleanup;
 
@@ -17,6 +17,7 @@ namespace Common
         protected TraderBase(Logger logger)
         {
             _logger = logger;
+            Initialize();
         }
 
 
@@ -36,6 +37,7 @@ namespace Common
                                           true, ConsoleColor.Cyan);
 //                    throw;
                     Thread.Sleep(ERROR_RECOVERY_BREAK);
+                    Initialize();   //Re-init API object
                     log("Resurrected after " + ERROR_RECOVERY_BREAK + "ms, let's try again.", ConsoleColor.Magenta);
                 }
             } while (!_killSignal);
@@ -47,6 +49,8 @@ namespace Common
             log("Trader received kill signal. Good bye.");
         }
 
+        /// <summary>Should Initialize API object. MUST be called before Check()!</summary>
+        protected abstract void Initialize();
 
         /// <summary>Single round in trading. Check status of active </summary>
         protected abstract void Check();

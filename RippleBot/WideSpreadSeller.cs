@@ -12,10 +12,10 @@ namespace RippleBot
     /// </summary>
     internal class WideSpreadSeller : TraderBase
     {
-        private readonly RippleApi _requestor;
+        private RippleApi _requestor;
 
         //BTC amount to trade
-        private readonly double _operativeAmount;
+        private double _operativeAmount;
         private const double MIN_SPREAD = 0.0002;
         //Minimum difference between BUY price and subsequent SELL price (so we have at least some profit)
         private const double MIN_DIFFERENCE = 0.000015;
@@ -44,10 +44,13 @@ namespace RippleBot
 
 
         public WideSpreadSeller(Logger logger) : base(logger)
+        { }
+
+        protected override void Initialize()
         {
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             log("Wide spread trader for RippleCN initialized with operative={0}; MinSpread={1}", _operativeAmount, MIN_SPREAD);
-            _requestor = new RippleApi(logger, "rnuF96W4SZoCJmbHYBFoJZpR8eCaxNvekK"/*RippleCN.com*/, "CNY");
+            _requestor = new RippleApi(_logger, "rnuF96W4SZoCJmbHYBFoJZpR8eCaxNvekK"/*RippleCN.com*/, "CNY");
             _requestor.Init();
         }
 

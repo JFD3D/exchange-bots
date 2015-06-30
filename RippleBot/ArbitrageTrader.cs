@@ -13,12 +13,12 @@ namespace RippleBot
     /// </summary>
     public class ArbitrageTrader : TraderBase
     {
-        private readonly string _baseCurrency;
-        private readonly string _arbCurrency;
-        private readonly string _baseGateway;
-        private readonly string _arbGateway;
-        private readonly double _parity;
-        private readonly double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
+        private string _baseCurrency;
+        private string _arbCurrency;
+        private string _baseGateway;
+        private string _arbGateway;
+        private double _parity;
+        private double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 
         private const int ZOMBIE_CHECK = 12;            //Check for dangling orders to cancel every 12th round
@@ -31,13 +31,16 @@ namespace RippleBot
         private double _baseFeeFactor = 0.0;
         private double _arbFeeFactor = 0.00;    //0%
 
-        private readonly RippleApi _baseRequestor;      //TODO: No! Use only one requestor with 2 gateways
-        private readonly RippleApi _arbRequestor;
+        private RippleApi _baseRequestor;      //TODO: No! Use only one requestor with 2 gateways
+        private RippleApi _arbRequestor;
 
 
 
         public ArbitrageTrader(Logger logger)
             : base(logger)
+        { }
+
+        protected override void Initialize()
         {
             _baseCurrency = Configuration.GetValue("base_currency_code");
             _baseGateway = Configuration.GetValue("base_gateway_address");
@@ -49,13 +52,12 @@ namespace RippleBot
             _arbFactor = double.Parse(Configuration.GetValue("profit_factor"));
             _intervalMs = 8000;
 
-            _baseRequestor = new RippleApi(logger, _baseGateway, _baseCurrency);
+            _baseRequestor = new RippleApi(_logger, _baseGateway, _baseCurrency);
             _baseRequestor.Init();
-            _arbRequestor = new RippleApi(logger, _arbGateway, _arbCurrency);
+            _arbRequestor = new RippleApi(_logger, _arbGateway, _arbCurrency);
             _arbRequestor.Init();
             log("Arbitrage trader started for currencies {0}, {1} with parity={2:0.000}; profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
         }
-
 
         protected override void Check()
         {

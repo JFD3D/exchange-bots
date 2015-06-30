@@ -9,15 +9,15 @@ namespace BtceBot
 {
     internal class CrazySellerTrap : TraderBase
     {
-        private readonly BtceApi _requestor;
+        private BtceApi _requestor;
 
         //Mininum order amount on BTC-E, the server returns error when trying to create smaller one
         private const double MIN_ORDER_AMOUNT = 0.1;
 
         //LTC amount to trade
-        private readonly double _operativeAmount;
-        private readonly double _minWallVolume;
-        private readonly double _maxWallVolume;
+        private double _operativeAmount;
+        private double _minWallVolume;
+        private double _maxWallVolume;
         //Volumen of LTC necessary to accept our offer
         private double _volumeWall;
         //Minimum difference between SELL price and subsequent BUY price (so we have at least some profit). Note: fee is 0.2%
@@ -43,12 +43,16 @@ namespace BtceBot
 
 
         public CrazySellerTrap(Logger logger) : base(logger)
+        { }
+
+
+        protected override void Initialize()
         {
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
             _maxWallVolume = double.Parse(Configuration.GetValue("max_volume"));
             log("LTC-E Litecoin CST trader initialized with operative={0}; MinWall={1}; MaxWall={2}", _operativeAmount, _minWallVolume, _maxWallVolume);
-            _requestor = new BtceApi(logger);
+            _requestor = new BtceApi(_logger);
         }
 
         protected override void Check()

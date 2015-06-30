@@ -12,20 +12,20 @@ namespace RippleBot
     /// </summary>
     internal class CrazySellerTrap : TraderBase
     {
-        private readonly RippleApi _requestor;
+        private RippleApi _requestor;
 
         //XRP amount to trade
-        private readonly double _operativeAmount;
-        private readonly double _minWallVolume;
-        private readonly double _maxWallVolume;
+        private double _operativeAmount;
+        private double _minWallVolume;
+        private double _maxWallVolume;
         //Volumen of XRP necessary to accept our offer
         private double _volumeWall;
         //Minimum difference between BUY price and subsequent SELL price (so we have at least some profit). Value from config.
-        private readonly double _minDifference;
+        private double _minDifference;
         //Tolerance of BUY price. Usefull if possible price change is minor, to avoid frequent order updates. Value from config.
-        private readonly double _minPriceUpdate;    //fiat/XRP
+        private double _minPriceUpdate;    //fiat/XRP
         private const double MIN_ORDER_AMOUNT = 0.5;
-        private readonly string _currencyCode;
+        private string _currencyCode;
 
         private const int ZOMBIE_CHECK = 10;            //Check for dangling orders to cancel every 10th round
         private int _counter;
@@ -50,6 +50,10 @@ namespace RippleBot
 
 
         public CrazySellerTrap(Logger logger) : base(logger)
+        { }
+
+
+        protected override void Initialize()
         {
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
@@ -66,7 +70,7 @@ namespace RippleBot
             _cleanup = bool.Parse(cleanup ?? false.ToString());
             log("Zombie cleanup: " + cleanup);
 
-            _requestor = new RippleApi(logger, gateway, _currencyCode);
+            _requestor = new RippleApi(_logger, gateway, _currencyCode);
             _requestor.Init();
             log("CST trader started for currency {0} with operative={1}; MinWall={2}; MaxWall={3}",
                 _currencyCode, _operativeAmount, _minWallVolume, _maxWallVolume);

@@ -13,12 +13,12 @@ namespace HuobiBot
     /// </summary>
     internal class CrazySellerTrap : TraderBase
     {
-        private readonly HuobiApi _requestor;
+        private HuobiApi _requestor;
 
         //BTC amount to trade
-        private readonly double _operativeAmount;
-        private readonly double _minWallVolume;
-        private readonly double _maxWallVolume;
+        private double _operativeAmount;
+        private double _minWallVolume;
+        private double _maxWallVolume;
         //Volumen of BTC necessary to accept our offer
         private double _volumeWall;
         //Minimum difference between BUY price and subsequent SELL price (so we have at least some profit)
@@ -44,14 +44,17 @@ namespace HuobiBot
 
 
         public CrazySellerTrap(Logger logger) : base(logger)
+        { }
+
+
+        protected override void Initialize()
         {
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
             _maxWallVolume = double.Parse(Configuration.GetValue("max_volume"));
             log(String.Format("Huobi CST trader initialized with operative={0}; MinWall={1}; MaxWall={2}", _operativeAmount, _minWallVolume, _maxWallVolume));
-            _requestor = new HuobiApi(logger);
+            _requestor = new HuobiApi(_logger);
         }
-
 
         /// <summary>The core method to do one iteration of orders' check and updates</summary>
         protected override void Check()

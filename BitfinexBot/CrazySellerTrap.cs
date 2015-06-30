@@ -9,12 +9,12 @@ namespace BitfinexBot
 {
     internal class CrazySellerTrap : TraderBase
     {
-        private readonly BitfinexApi _requestor;
+        private BitfinexApi _requestor;
 
         //LTC amount to trade
-        private readonly double _operativeAmount;
-        private readonly double _minWallVolume;
-        private readonly double _maxWallVolume;
+        private double _operativeAmount;
+        private double _minWallVolume;
+        private double _maxWallVolume;
         //Volumen of LTC necessary to accept our offer
         private double _volumeWall;
         //Minimum difference between SELL price and subsequent BUY price (so we have at least some profit)
@@ -40,12 +40,15 @@ namespace BitfinexBot
 
 
         public CrazySellerTrap(Logger logger) : base(logger)
+        { }
+
+        protected override void Initialize()
         {
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
             _maxWallVolume = double.Parse(Configuration.GetValue("max_volume"));
             log(String.Format("Bitfinex Litecoin CST trader initialized with operative={0}; MinWall={1}; MaxWall={2}", _operativeAmount, _minWallVolume, _maxWallVolume));
-            _requestor = new BitfinexApi(logger);
+            _requestor = new BitfinexApi(_logger);
         }
 
         protected override void Check()

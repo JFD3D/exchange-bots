@@ -1,6 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Common;
-using System.Collections.Generic;
 
 
 namespace RippleBot.Business
@@ -104,16 +104,22 @@ namespace RippleBot.Business
     [DataContract]
     internal class Take
     {
-        [DataMember] internal string currency { get; set; }
-        [DataMember] internal string issuer { get; set; }
-        [DataMember] internal string value { get; set; }
+        [DataMember(EmitDefaultValue = false)]
+        internal string currency { get; set; }
 
+        [DataMember(EmitDefaultValue = false)]
+        internal string issuer { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        internal string value { get; set; }
+
+/*TODO: DELETE
         internal Take()
         {
             //For purposes of serialization to JSON
             currency = "";
             issuer = "";
             value = "";
-        }
+        }*/
     }
 }

@@ -18,6 +18,7 @@ namespace RippleBot
         private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";
         private const byte RETRY_COUNT = 10;
         private const int RETRY_DELAY = 2000;
+        private const string MANUAL_ORDER_SIGN = "12345";
         private readonly string _issuerAddress;      //BitStamp, SnapSwap, RippleCN or so
         private readonly string _fiatCurreny;
 
@@ -451,12 +452,20 @@ namespace RippleBot
 
             foreach (var offer in offerList.result.offers)
             {
-                if (offer.Price.ToString().Contains("12345"))       //TODO: This is really stupid!! Find some way how to safely flag manual/bot orders
+                if (offer.Price.ToString().Contains(MANUAL_ORDER_SIGN) ||
+                    offer.Amount.ToString().Contains(MANUAL_ORDER_SIGN) || offer.AmountXrp.ToString().Contains(MANUAL_ORDER_SIGN))  //TODO: No! Investigate how a fiatX/fiatY order looks like once RL servers are up again
+                {
+                    //TODO: This is really stupid!! Find some way how to safely flag manual/bot orders
                     _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, possibly manual", true, ConsoleColor.Cyan);
+                }
                 else if (-1 != buyOrderId && buyOrderId == offer.seq)
+                {
                     _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, our BUY order", false);
+                }
                 else if (-1 != sellOrderId && sellOrderId == offer.seq)
+                {
                     _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, our SELL order", false);
+                }
                 else
                 {
                     _logger.AppendMessage(String.Format("Identified {0} zombie order with ID={1} ({2} XRP for {3} {4}). Trying to cancel...",

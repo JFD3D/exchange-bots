@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Common;
 
 
@@ -26,10 +24,6 @@ namespace RippleBot
 
         //I need to watch XRP balance to revert filled abandoned fiat->XRP orders
         private double _lastValidXrpBalance = -1.0;
-
-        //TODO: find and incorporate gateway fees (RTJ has around 1%). Load from config.
-        private double _baseFeeFactor = 0.0;
-        private double _arbFeeFactor = 0.00;    //0%
 
         private RippleApi _baseRequestor;      //TODO: No! Use only one requestor with 2 gateways
         private RippleApi _arbRequestor;

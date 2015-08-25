@@ -1,10 +1,9 @@
-﻿
-
-using System;
+﻿using System;
 using System.Net;
 using System.Threading;
 using Common;
 using LakeBtcBot.Business;
+
 
 namespace LakeBtcBot
 {
@@ -47,7 +46,7 @@ namespace LakeBtcBot
             }
             else
             {
-                currencyCode = "_" + currencyCode;
+                currencyCode = "_" + currencyCode.ToLower();
             }
 
             var data = sendGetRequest(String.Format("{0}bcorderbook{1}", BASE_URL, currencyCode));

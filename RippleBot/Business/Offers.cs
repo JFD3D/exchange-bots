@@ -112,14 +112,5 @@ namespace RippleBot.Business
 
         [DataMember(EmitDefaultValue = false)]
         internal string value { get; set; }
-
-/*TODO: DELETE
-        internal Take()
-        {
-            //For purposes of serialization to JSON
-            currency = "";
-            issuer = "";
-            value = "";
-        }*/
     }
 }

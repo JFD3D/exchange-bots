@@ -23,7 +23,7 @@ namespace LakeBtcBot
 
             _parity = double.Parse(Configuration.GetValue("parity_ratio"));
             _arbFactor = double.Parse(Configuration.GetValue("profit_factor"));
-            _intervalMs = 8000;
+            _intervalMs = 3000;
 
             _requestor = new LakeBtcApi(_logger, _baseCurrency, _arbCurrency);
             log("LakeBTC arbitrage trader started for currencies {0}, {1} with parity={2:0.000}; profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
@@ -44,7 +44,7 @@ namespace LakeBtcBot
 
             log("BASIC ratio={0:0.00000}; ARB ratio={1:0.00000}", baseRatio, arbRatio);
 
-            log(new string('=', 70));
+            log(new string('=', 70), System.ConsoleColor.Gray);
         }
     }
 }

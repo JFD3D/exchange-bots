@@ -8,7 +8,9 @@ namespace LakeBtcBot.Business
     [DataContract]
     internal class MarketDepthResponse : IMarketDepthResponse<Order>
     {
+        [DataMember]
         public List</*List<double>*/Order> asks { get; set; }
+        [DataMember]
         public List</*List<double>*/Order> bids { get; set; }
 
         #region IMarketDepthResponse members
@@ -19,7 +21,7 @@ namespace LakeBtcBot.Business
     }
 
 
-    [DataContract]
+//    [DataContract]
     internal class Order : List<double>, IMarketOrder
     {
         #region IMarketOrder implementations

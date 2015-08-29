@@ -37,6 +37,7 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArbitrageTrader.cs" />
     <Compile Include="BtceApi.cs" />
     <Compile Include="Business\AccountInfo.cs" />
     <Compile Include="Business\CancelOrder.cs" />

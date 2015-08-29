@@ -197,7 +197,7 @@ namespace RippleBot
                         //Partially filled
                         if (!buyOrder.AmountXrp.eq(_buyOrderAmount))
                         {
-                            log("BUY order ID={0} partially filled at price={1} CNY. Remaining amount={2} XRP;", ConsoleColor.Green, _buyOrderId, buyOrder.Price, buyOrder.AmountXrp);
+                            log("BUY order ID={0} partially filled at price={1} {2}. Remaining amount={3} XRP;", ConsoleColor.Green, _buyOrderId, buyOrder.Price, buyOrder.Currency, buyOrder.AmountXrp);
                             _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, buyOrder.AmountXrp);
                             _buyOrderAmount = buyOrder.AmountXrp;
                             _buyOrderPrice = price;

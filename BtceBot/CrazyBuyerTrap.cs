@@ -208,7 +208,7 @@ namespace BtceBot
             }
 
             var balance = _requestor.GetAccountBalance();
-            log("DEBUG: Balance = {0} LTC", balance);
+            log("INFO: Balance = {0} LTC", balance);
             log(new string('=', 90));
         }
 
@@ -226,7 +226,7 @@ namespace BtceBot
                     //The difference is too small and we'd be not the first SELL order. Leave previous price to avoid server call
                     if (-1 != _sellOrderId && sellPrice > market.Asks[0].Price && Math.Abs(sellPrice - _sellOrderPrice) < MIN_PRICE_DELTA)
                     {
-                        log("DEBUG: SELL price {0} too similar, using previous", sellPrice);
+                        log("INFO: SELL price {0} too similar, using previous", sellPrice);
                         return _sellOrderPrice;
                     }
 

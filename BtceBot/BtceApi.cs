@@ -15,7 +15,7 @@ namespace BtceBot
 {
     internal class BtceApi
     {
-        private const string DATA_BASE_URL = "https://btc-e.com/api/2/ltc_usd/";
+        private const string DATA_BASE_URL = "https://btc-e.com/api/3/";    //TODO: not working anymore! "https://btc-e.com/api/2/ltc_usd/";
         private const string TRADE_BASE_URL = "https://btc-e.com/tapi";
         private const byte RETRY_COUNT = 10;
         private const int RETRY_DELAY = 1000;
@@ -42,7 +42,7 @@ namespace BtceBot
 
             _hashMaker = new HMACSHA512(Encoding.ASCII.GetBytes(Configuration.SecretKey));
 
-            synchronizeNonce();
+//TODO?            synchronizeNonce();
         }
 
         internal DateTime GetServerTime()
@@ -55,6 +55,16 @@ namespace BtceBot
         internal MarketDepthResponse GetMarketDepth()
         {
             var data = sendGetRequest(DATA_BASE_URL + "depth");
+            return Helpers.DeserializeJSON<MarketDepthResponse>(data);
+        }
+
+        internal MarketDepthResponse GetMarketDepth(string currencyCode)
+        {
+            currencyCode = currencyCode.ToLower();
+
+            var data = sendGetRequest(DATA_BASE_URL + "depth/btc_" + currencyCode + "?limit=50");
+            //Let's keep the deserialization simple
+            data = data.Replace(currencyCode, "fiat");
             return Helpers.DeserializeJSON<MarketDepthResponse>(data);
         }
 

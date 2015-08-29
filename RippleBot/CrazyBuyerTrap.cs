@@ -64,7 +64,6 @@ namespace RippleBot
             _minPriceUpdate = double.Parse(Configuration.GetValue("min_price_update"));
             var cleanup = Configuration.GetValue("cleanup_zombies");
             _cleanup = bool.Parse(cleanup ?? false.ToString());
-            log("Zombie cleanup: " + cleanup);
 
             _requestor = new RippleApi(_logger, gateway, _currencyCode);
             _requestor.Init();
@@ -265,9 +264,8 @@ namespace RippleBot
 
             _xrpBalance = _requestor.GetXrpBalance();
             log("### Balance= {0} XRP", _xrpBalance);
-            log(new string('=', 84));
+            log(new string('=', 74));
         }
-
 
 
         private double suggestSellPrice(Market market)

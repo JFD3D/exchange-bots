@@ -32,6 +32,9 @@ namespace HuobiBot
                 case "cst":
                     trader = new CrazySellerTrap(logger);
                 break;
+                case "arb":
+                    trader = new ArbitrageTrader(logger);
+                break;
                 case "bear":
                     trader = new NaiveBear(logger);
                 break;

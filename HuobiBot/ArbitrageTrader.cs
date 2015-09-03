@@ -1,7 +1,7 @@
 ﻿using Common;
 
 
-namespace LakeBtcBot
+namespace HuobiBot
 {
     internal class ArbitrageTrader : TraderBase
     {
@@ -10,11 +10,12 @@ namespace LakeBtcBot
         private double _parity;
         private double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
 
-        private LakeBtcApi _requestor;
+        private HuobiApi _requestor;
 
         public ArbitrageTrader(Logger logger)
             : base(logger)
         { }
+
 
         protected override void Initialize()
         {
@@ -25,7 +26,7 @@ namespace LakeBtcBot
             _arbFactor = double.Parse(Configuration.GetValue("profit_factor"));
             _intervalMs = 3000;
 
-            _requestor = new LakeBtcApi(_logger, _baseCurrency, _arbCurrency);
+            _requestor = new HuobiApi(_logger);
             log("LakeBTC arbitrage trader started for currencies {0}, {1} with parity={2:0.000}; profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
         }
 

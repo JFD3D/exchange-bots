@@ -66,6 +66,30 @@ namespace HuobiBot
             return depth;
         }
 
+        /// <summary>Get market depth for given fiat currency and BTC</summary>
+        /// <param name="currencyCode">One of "USD", "CNY"</param>
+        internal MarketDepthResponse GetMarketDepth(string currencyCode)
+        {
+            currencyCode = currencyCode.ToLower();
+            string marketUrl;
+            if ("usd" == currencyCode)
+                marketUrl = "http://api.huobi.com/usdmarket/depth_btc_30.js";
+            else if ("cny" == currencyCode)
+                marketUrl = "http://api.huobi.com/staticmarket/depth_btc_30.js";
+            else
+            {
+                throw new ArgumentException("Invalid currency code. Expected one of [USD, CNY]", "currencyCode");
+            }
+
+            var client = new WebClient2(_logger, DATA_TIMEOUT);
+
+            if (null != _webProxy)
+                client.Proxy = _webProxy;
+
+            var depth = client.DownloadObject<MarketDepthResponse>(marketUrl);
+            return depth;
+        }
+
         internal TradeStatisticsResponse GetTradeStatistics()
         {
             var client = new WebClient2(_logger, DATA_TIMEOUT);

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using Common;
@@ -11,8 +10,8 @@ namespace HuobiBot.Business
     [DataContract]
     internal class MarketDepthResponse : IMarketDepthResponse<Order>
     {
-        [DataMember] internal List<List<object>> asks { get; set; }
-        [DataMember] internal List<List<object>> bids { get; set; }
+        [DataMember] internal List<List<double>> asks { get; set; }
+        [DataMember] internal List<List<double>> bids { get; set; }
 
         private const int ORDER_LIST_LENGTH = 15;
 
@@ -28,7 +27,9 @@ namespace HuobiBot.Business
                     _asks = new List<Order>();
 
                     foreach (var ask in asks.TakeLast(ORDER_LIST_LENGTH).Reverse())
-                        _asks.Add(new Order {Price = Convert.ToDouble(ask[0]), Amount = Convert.ToDouble(ask[1])});
+                    {
+                        _asks.Add(new Order {Price = ask[0], Amount = ask[1]});
+                    }
                 }
 
                 return _asks;
@@ -48,7 +49,9 @@ namespace HuobiBot.Business
                     _bids = new List<Order>();
 
                     foreach (var bid in bids.Take(ORDER_LIST_LENGTH))
-                        _bids.Add(new Order {Price = Convert.ToDouble(bid[0]), Amount = Convert.ToDouble(bid[1])});
+                    {
+                        _bids.Add(new Order {Price = bid[0], Amount = bid[1]});
+                    }
                 }
 
                 return _bids;

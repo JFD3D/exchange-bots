@@ -37,6 +37,7 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArbitrageTrader.cs" />
     <Compile Include="Business\AccountInfo.cs" />
     <Compile Include="Business\BasicResponse.cs" />
     <Compile Include="Business\Candles.cs" />
@@ -57,7 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DataSamples\candles_1m.json" />
+    <None Include="DataSamples\cnyMarket.json" />
     <None Include="DataSamples\get_account_info.json" />
+    <None Include="DataSamples\usdMarket.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

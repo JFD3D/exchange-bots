@@ -294,7 +294,7 @@ namespace RippleBot
                 sum += ask.Amount;
 
                 //Don't consider volume of own order
-                if (ask.Price.eq(_sellOrderPrice))
+                if (Configuration.AccessKey == ask.Account && ask.Sequence == _sellOrderId/*ask.Price.eq(_sellOrderPrice)*/)
                     sum -= _sellOrderAmount;
             }
 
@@ -315,7 +315,7 @@ namespace RippleBot
             foreach (var bid in market.Bids)
             {
                 //Don't count self
-                if (bid.Price.eq(_buyOrderPrice) && bid.Amount.eq(_buyOrderAmount))
+                if (Configuration.AccessKey == bid.Account && bid.Sequence == _buyOrderId /*bid.Price.eq(_buyOrderPrice) && bid.Amount.eq(_buyOrderAmount)*/)
                     continue;
                 //Skip BUY orders with tiny amount
                 sumVolume += bid.Amount;

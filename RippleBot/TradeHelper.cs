@@ -1,7 +1,9 @@
-﻿using RippleBot.Business.DataApi;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Common.Business;
+using RippleBot.Business.DataApi;
 
 
 namespace RippleBot
@@ -62,6 +64,31 @@ namespace RippleBot
 
             //Average of volume and frequency coeficients
             return (intenseCoef + volumeCoef) / 2;
+        }
+
+        /// <summary>
+        /// From list of orders (can be either asks or bids) returns the first with accumulated
+        /// amount higher than given threshold
+        /// </summary>
+        /// <param name="orders">
+        /// Current orders on any side of the orderbook. Must be ordered in orderbook logic (e.g. highest bid/lowest ask first)
+        /// </param>
+        /// <param name="minAmount">Order size threshold</param>
+        internal static T GetFirstLiquidOrder<T>(List<T> orders, double minAmount) where T : IMarketOrder
+        {
+            double amountSum = 0.0;
+            foreach (var order in orders)
+            {
+                amountSum += order.Amount;
+
+                if (amountSum > minAmount)
+                {
+                    return order;
+                }                
+            }
+
+            //Hard to believe but orderbook is filled with only poor orders. Just return first here.
+            return orders[0];
         }
     }
 }

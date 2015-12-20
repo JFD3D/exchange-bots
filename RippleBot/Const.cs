@@ -5,7 +5,7 @@ namespace RippleBot
 {
     internal static class Const
     {
-        /// <summary>Number of drops in one XRP</summary>
+        /// <summary>Number of 'drops' (smallest value that can be in a transaction) in one XRP</summary>
         internal const double DROPS_IN_XRP = 1000000.0;
 
         /// <summary>

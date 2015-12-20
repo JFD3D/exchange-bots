@@ -118,7 +118,6 @@ namespace RippleBot
                         log("SELL order ID={0} partially filled at price={1} {2}. Remaining amount={3} XRP;",
                             ConsoleColor.Green, _sellOrderId, _executedSellPrice, sellOrder.Currency, sellOrder.AmountXrp);
 
-
                         //Check remaining amount, drop the BUY if it's very tiny
                         if (sellOrder.AmountXrp < MIN_ORDER_AMOUNT)
                         {
@@ -146,7 +145,7 @@ namespace RippleBot
                     var balance = _requestor.GetXrpBalance();
                     if (balance.eq(_xrpBalance, 0.1))
                     {
-                        log("SELL order ID={0} closed but asset validation failed (balance={1} XRP). Asuming was cancelled, trying to recreate",
+                        log("SELL order ID={0} closed but asset validation failed (balance={1} XRP). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _sellOrderId, balance);
                         _sellOrderPrice = suggestSellPrice(market);
                         _sellOrderId = _requestor.PlaceSellOrder(_sellOrderPrice, ref _sellOrderAmount);
@@ -227,7 +226,7 @@ namespace RippleBot
                         var balance = _requestor.GetXrpBalance();
                         if (balance.eq(_xrpBalance, 0.1))
                         {
-                            log("BUY order ID={0} closed but asset validation failed (balance={1} XRP). Asuming was cancelled, trying to recreate",
+                            log("BUY order ID={0} closed but asset validation failed (balance={1} XRP). Assuming was cancelled, trying to recreate",
                                 ConsoleColor.Yellow, _buyOrderId, balance);
                             _buyOrderPrice = suggestBuyPrice(market);
                             _buyOrderId = _requestor.PlaceBuyOrder(_buyOrderPrice, _buyOrderAmount);

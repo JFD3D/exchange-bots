@@ -35,6 +35,9 @@ namespace RippleBot
                 case "arb":
                     trader = new ArbitrageTrader(logger);
                     break;
+                case "dirarb":
+                    trader = new DirectArbitrage(logger);
+                    break;
                 case "wss-ripplecn":
                     trader = new WideSpreadSeller(logger);
                     break;

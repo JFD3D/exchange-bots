@@ -20,15 +20,17 @@ namespace Common
             _values = new Dictionary<string, string>();
 
             string line;
-            var file = new StreamReader(fullPath);
-            while ((line = file.ReadLine()) != null)
+            using (var reader = new StreamReader(fullPath))
             {
-                if (!String.IsNullOrEmpty(line) && line.Contains("="))
+                while ((line = reader.ReadLine()) != null)
                 {
-                    var index = line.IndexOf('=');
-                    var key = line.Substring(0, index);
-                    var value = line.Substring(index + 1);
-                    _values.Add(key.ToUpper(), value);
+                    if (!String.IsNullOrEmpty(line) && line.Contains("="))
+                    {
+                        var index = line.IndexOf('=');
+                        var key = line.Substring(0, index);
+                        var value = line.Substring(index + 1);
+                        _values.Add(key.ToUpper(), value);
+                    }
                 }
             }
         }

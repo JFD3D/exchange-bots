@@ -19,7 +19,7 @@ namespace RippleBot
         private const byte RETRY_COUNT = 10;
         private const int RETRY_DELAY = 2000;
         private const string MANUAL_ORDER_SIGN = "12345";
-        private readonly string _issuerAddress;      //BitStamp, SnapSwap, RippleCN or so
+        private readonly string _issuerAddress;     //BitStamp, SnapSwap, RippleCN or so
         private readonly string _fiatCurreny;
 
         private readonly string _rippleSocketUri;
@@ -187,7 +187,7 @@ namespace RippleBot
 
         internal int PlaceBuyOrder(double price, double amount)
         {
-            long amountXrpDrops = (long) Math.Round(amount*1000000);
+            long amountXrpDrops = (long) Math.Round(amount * Const.DROPS_IN_XRP);
             double amountFiat = price * amount;
 
             var command = new CreateBuyOrderRequest
@@ -276,7 +276,7 @@ namespace RippleBot
 
         private int placeSellOrder(double amountFiat, ref double amountXrp)
         {
-            long amountXrpDrops = (long) Math.Round(amountXrp*1000000);
+            long amountXrpDrops = (long)Math.Round(amountXrp * Const.DROPS_IN_XRP);
 
             var command = new CreateSellOrderRequest
             {
@@ -353,6 +353,85 @@ namespace RippleBot
             }
 
             return orderId;
+        }
+
+        /// <summary>Place order to trade one non-XRP asset for another.</summary>
+        /// <param name="amount">Amount of asset this bot owns</param>        
+        /// <param name="price">Unit price</param>
+        /// <param name="toCurrency">Code of asset we want to purchase</param>
+        /// <param name="fromGateway">Destination gateway address</param>
+        /// <returns>Order ID</returns>
+        internal int PlaceOrder(double amount, double price, string toCurrency, string toGateway)
+        {
+            double takerPaysValue = amount * price;
+
+            var command = new CreateOrderRequest
+            {
+                tx_json = new CreateOrder_TxJson
+                {
+                    Account = _walletAddress,
+                    TakerGets = new Take
+                    {
+                        currency = _fiatCurreny,
+                        value = amount.ToString("0.############"),  //12 decimal places should be enough
+                        issuer = _issuerAddress,
+                    },
+                    TakerPays = new Take
+                    {
+                        currency = toCurrency,
+                        value = takerPaysValue.ToString("0.############"),
+                        issuer = toGateway
+                    }
+                },
+                secret = Configuration.SecretKey
+            };
+
+            //TODO: ugly copy pasta here (from PlaceBuyOrder). Refactor!
+            ErrorResponse error = null;
+            var delay = RETRY_DELAY;
+            for (int i = 1; i <= RETRY_COUNT; i++)
+            {
+                var data = sendToRippleNet(Helpers.SerializeJson(command));
+
+                if (null == data)
+                    return -1;
+
+                error = Helpers.DeserializeJSON<ErrorResponse>(data);
+                if (!String.IsNullOrEmpty(error.error))
+                {
+                    _logger.AppendMessage("Error creating order. Mesage=" + error.error_message, true, ConsoleColor.Magenta);
+                    if (!error.IsCritical)
+                    {
+                        //The request might have been successfull even if server says there were problems
+                        _logger.AppendMessage("Retry in " + delay + " ms...", true, ConsoleColor.Yellow);
+                        delay *= 2;
+                        Thread.Sleep(delay);
+                        continue;
+                    }
+                    throw new Exception(error.error + " " + error.error_message);
+                }
+
+                var response = Helpers.DeserializeJSON<NewOrderResponse>(data);
+
+                if (ResponseKind.FatalError == response.result.ResponseKind)
+                {
+                    var message = String.Format("Error creating order. Response={0} {1}", response.result.engine_result, response.result.engine_result_message);
+                    _logger.AppendMessage(message, true, ConsoleColor.Yellow);
+                    throw new Exception(message);
+                }
+                if (ResponseKind.NonCriticalError == response.result.ResponseKind)
+                {
+                    _logger.AppendMessage("Non-fatal error creating order. Message=" + response.result.engine_result_message, true, ConsoleColor.Yellow);
+                    _logger.AppendMessage("Retry in " + delay + " ms...", true, ConsoleColor.Yellow);
+                    delay *= 2;
+                    Thread.Sleep(delay);
+                    continue;
+                }
+
+                return response.result.tx_json.Sequence;
+            }
+
+            throw new Exception(String.Format("Socket request failed {0} times in a row with error '{1}'. Giving up.", RETRY_COUNT, error.error_message));
         }
 
         /// <summary>Cancel existing offer</summary>
@@ -453,7 +532,7 @@ namespace RippleBot
             foreach (var offer in offerList.result.offers)
             {
                 if (offer.Price.ToString().Contains(MANUAL_ORDER_SIGN) ||
-                    offer.Amount.ToString().Contains(MANUAL_ORDER_SIGN) || offer.AmountXrp.ToString().Contains(MANUAL_ORDER_SIGN))  //TODO: No! Investigate how a fiatX/fiatY order looks like once RL servers are up again
+                    offer.Amount.ToString().Contains(MANUAL_ORDER_SIGN) || offer.AmountXrp.ToString().Contains(MANUAL_ORDER_SIGN))  //TODO: No! Investigate how a fiatX/fiatY order looks like
                 {
                     //TODO: This is really stupid!! Find some way how to safely flag manual/bot orders
                     _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, possibly manual", true, ConsoleColor.Cyan);

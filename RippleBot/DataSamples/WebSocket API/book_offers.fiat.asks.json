@@ -1,0 +1,432 @@
+﻿{
+  "id": 2,
+  "result": {
+    "ledger_current_index": 17813229,
+    "offers": [
+      {
+        "Account": "rsEWhhCs21rV8B1uomxJ4RL98VFZtmmrNE",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B455038FC4B8632800",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000000",
+        "PreviousTxnID": "B7C775ABCEA7AC0ACB5B80BA6FDF72564A0FB34C7D2F975553336B9E2E075A4B",
+        "PreviousTxnLgrSeq": 17813111,
+        "Sequence": 2523,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "10000"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "10025"
+        },
+        "index": "F9337CBF92741115250FEABD2B71D713A3D6EE80730C2A73927142F81B138BD1",
+        "owner_funds": "16319.1729923947",
+        "quality": "1.0025"
+      },
+      {
+        "Account": "rhTqdCG4HAM9uFeiQAtfpH9uKjK4VBxGeT",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B455038FC4B8632804",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000000",
+        "PreviousTxnID": "536F30C5AB1771625ABDE5E0F13A1C53643761DDDA6B39353FD2606CD4BC806F",
+        "PreviousTxnLgrSeq": 17806814,
+        "Sequence": 390,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "21.369104417564"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "21.422527178608"
+        },
+        "index": "28CC5BCE77B5D9D8B8CB82E1370B98EF57E522B3BB18C788A1B612630DA7CC5F",
+        "owner_funds": "21.36910441756385",
+        "quality": "1.002500000000004",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "21.36910441756385"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "21.42252717860785"
+        }
+      },
+      {
+        "Account": "rKY5KrMxePseZnNjRFCNKPCB3tALaUrsM4",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B45503900C6664AEC6",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000071",
+        "PreviousTxnID": "F24A5769D841C8C095269A8100512B8D1D69B0E9415164FEE7BE624007D6EE9A",
+        "PreviousTxnLgrSeq": 17807020,
+        "Sequence": 26995,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "997.2"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "1000"
+        },
+        "index": "F8BD91CC84C0B009F6CD5813E4FED09FB7F2900E9CDDF5276DBBAF362E1C4F54",
+        "owner_funds": "4640.427857868958",
+        "quality": "1.002807862013638"
+      },
+      {
+        "Account": "rKY5KrMxePseZnNjRFCNKPCB3tALaUrsM4",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B45503901F21F70D83",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000071",
+        "PreviousTxnID": "6146B65F82B1B3B2EF10C1D3731E43F1F1CDA9AE7B5A5EC00FAE3B8EA7A14E2A",
+        "PreviousTxnLgrSeq": 17808344,
+        "Sequence": 26999,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "1994.24"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "2000"
+        },
+        "index": "25ED693699BA8FE2052B5BED3114B7990DF706BE7ED21DFDB09105E3A55AD70A",
+        "quality": "1.002888318356867"
+      },
+      {
+        "Account": "rJkesASj5LkUTWoxZD7znkmzHGbMdCzu14",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B455039021DA3EC800",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000003",
+        "PreviousTxnID": "6D5D89DB850DF0B24F8FBE6FD5FEBBB8C39D229F2F2C784EBEC0D3C61AC80B39",
+        "PreviousTxnLgrSeq": 17806854,
+        "Sequence": 2758,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "3000"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "3008.7"
+        },
+        "index": "6525114D083BB099CE09AB4FCFE7073EE18A382FC52122963F3DE852DC438C32",
+        "owner_funds": "1941.329086893326",
+        "quality": "1.0029",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "1941.329086893326"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "1946.958941245317"
+        }
+      },
+      {
+        "Account": "rKY5KrMxePseZnNjRFCNKPCB3tALaUrsM4",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B455039023D0FA6D1D",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000071",
+        "PreviousTxnID": "7A373517CCE749478B6128DE9B86C8A4027457D8032286093684357BA17100A3",
+        "PreviousTxnLgrSeq": 17806826,
+        "Sequence": 26993,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "697.97"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "700"
+        },
+        "index": "91B28E84BAA4AD5BBDAAB923DA06754300D6322016D9B25E574173B4165AF65A",
+        "quality": "1.002908434459933"
+      },
+      {
+        "Account": "rP45RuF983ttNc6zT7WtthnTSDC1iaGhg1",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B45503903922B5B000",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000013",
+        "PreviousTxnID": "1352071D30332823A1086CA01F0DBFC07906BCE7D359BD086D1143813BAAE7E2",
+        "PreviousTxnLgrSeq": 17806125,
+        "Sequence": 81048,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "100000"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "100300"
+        },
+        "index": "5B35EDA7FEBD5CB47787721FED1961046126EEA9C61F553906AC6B8E4673A0D2",
+        "owner_funds": "10000",
+        "quality": "1.003",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "10000"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "10030"
+        }
+      },
+      {
+        "Account": "r93wprTLQzvBqtpQsgZpaw8pZdGLwrRnNT",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B455039125B4DBDC04",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000002",
+        "PreviousTxnID": "C57BC9FB13B299AA2F9A008DE6FF2242C6107FD1FA86FB98ADA47524593F5E2C",
+        "PreviousTxnLgrSeq": 17806025,
+        "Sequence": 12187,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "1510.771021166887"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "1516.838374665548"
+        },
+        "index": "27EAB0846686FF28DE955766BB8E2D4922A2BC508E36203CFE28D8D069FC9A37",
+        "owner_funds": "28238.38153287159",
+        "quality": "1.004016064257028"
+      },
+      {
+        "Account": "rJkesASj5LkUTWoxZD7znkmzHGbMdCzu14",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B4550391F38388E800",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000003",
+        "PreviousTxnID": "99BBD348FCB3089882781CB8025B3A3885F983F3A2D6018A340061DDCA205F3F",
+        "PreviousTxnLgrSeq": 17726985,
+        "Sequence": 2665,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "5000"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "5024.5"
+        },
+        "index": "9121BBC552942D6D5A2921E0BFCA98AE528C4515F4E2D5BD72511750F4B0CC9D",
+        "quality": "1.0049",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "0"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "0"
+        }
+      },
+      {
+        "Account": "r93wprTLQzvBqtpQsgZpaw8pZdGLwrRnNT",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B4550391F921B073DE",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000002",
+        "PreviousTxnID": "F952640691D08CFD1E48FD5A340616D641F5246F8632BFE775494238E2913386",
+        "PreviousTxnLgrSeq": 17749896,
+        "Sequence": 12307,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "4975.5"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "5000"
+        },
+        "index": "E0B6BBEF8B5DB63DD91CA78FC6E4078187882DAECECD8533A0CFE4575A1AEE78",
+        "quality": "1.004924128228318"
+      },
+      {
+        "Account": "rP45RuF983ttNc6zT7WtthnTSDC1iaGhg1",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B45503920ACBFFD000",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000013",
+        "PreviousTxnID": "B316906C82576998643631AE55D70062AC9F9721779F75CC07CAA1DFD5829C08",
+        "PreviousTxnLgrSeq": 17725017,
+        "Sequence": 81035,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "30000"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "30150"
+        },
+        "index": "B6C8D57F5E6BC82F6D9CE1FB8BA490151F110CC13CA48FFCC7CA6FFF584A6A16",
+        "quality": "1.005",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "0"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "0"
+        }
+      },
+      {
+        "Account": "r93wprTLQzvBqtpQsgZpaw8pZdGLwrRnNT",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B4550392FC0F5D130E",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000002",
+        "PreviousTxnID": "090917194DBB3AF045AD2AFD0E7F85543B4B00BD68FA43F6D9111DA49787CA2F",
+        "PreviousTxnLgrSeq": 17803035,
+        "Sequence": 12389,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "4970"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "5000"
+        },
+        "index": "F7AA24F5BC13D36CDC49279C7A816D746F153D72A3974DC95C3A44CC8C45F2A6",
+        "quality": "1.006036217303822"
+      },
+      {
+        "Account": "rJkesASj5LkUTWoxZD7znkmzHGbMdCzu14",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B455039696F3392000",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000003",
+        "PreviousTxnID": "8709460F6470DC2A2FD6DE0832226181BC1B9DBC2BBC588243CBC3FC9F673AA4",
+        "PreviousTxnLgrSeq": 17707667,
+        "Sequence": 2568,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "1987.944723821356"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "2007.82417105957"
+        },
+        "index": "18F55DE33B63BCD624F7CC5249CCF50E22DC9F8FD9B877703BE4B1AB38B334C1",
+        "quality": "1.01",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "0"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "0"
+        }
+      },
+      {
+        "Account": "r93wprTLQzvBqtpQsgZpaw8pZdGLwrRnNT",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B4550396AE77E4F312",
+        "BookNode": "0000000000000000",
+        "Flags": 0,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000002",
+        "PreviousTxnID": "0EEA795C1A6BDEFAE7EE31C2AC0929C95E267D7F1D17A12B7F579FDE8A93F9BC",
+        "PreviousTxnLgrSeq": 17749900,
+        "Sequence": 12309,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "9900"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "10000"
+        },
+        "index": "F272C1932CED5C0B8D5815891FC46FB86C114ABC06172A8DAFCD4BAD6F8D1C22",
+        "quality": "1.01010101010101"
+      },
+      {
+        "Account": "rJkesASj5LkUTWoxZD7znkmzHGbMdCzu14",
+        "BookDirectory": "499CD0F1AD14F9D47296ADAB42E51E38A9B956B0BBA688B45503995171285000",
+        "BookNode": "0000000000000000",
+        "Flags": 131072,
+        "LedgerEntryType": "Offer",
+        "OwnerNode": "0000000000000003",
+        "PreviousTxnID": "5B10696DDA8F7D69960FBCB1DD795F6B644663EA6C87DD4C6E2B9475A155EDFA",
+        "PreviousTxnLgrSeq": 17706908,
+        "Sequence": 2565,
+        "TakerGets": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "5000"
+        },
+        "TakerPays": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "5065"
+        },
+        "index": "EFAF707D4EB450D1ED78C4E9A67152984DC514206F8400EF5F9C52AD061C9D9A",
+        "quality": "1.013",
+        "taker_gets_funded": {
+          "currency": "CNY",
+          "issuer": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+          "value": "0"
+        },
+        "taker_pays_funded": {
+          "currency": "CNY",
+          "issuer": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+          "value": "0"
+        }
+      }
+    ],
+    "validated": false
+  },
+  "status": "success",
+  "type": "response"
+}

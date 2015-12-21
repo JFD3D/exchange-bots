@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using WebSocket4Net;
+
 using Common;
 using RippleBot.Business;
 using RippleBot.Business.DataApi;
-using WebSocket4Net;
 
 
 namespace RippleBot
@@ -183,6 +185,39 @@ namespace RippleBot
             };
 
             return market;
+        }
+
+        /// <summary>
+        /// Get only ask offers of a market. 
+        /// </summary>
+        /// <param name="counterAssetCode">Code of counter asset (must not be XRP)</param>
+        /// <param name="counterAssetGateway">Gateway address of counter asset</param>
+        internal List<FiatAsk> GetOrderBookAsks(string counterAssetCode, string counterAssetGateway)
+        {
+            var command = new MarketDepthRequest
+            {
+                id = 2,
+                taker_pays = new Take { currency = counterAssetCode, issuer = counterAssetGateway },
+                taker_gets = new Take { currency = _fiatCurreny, issuer = _issuerAddress }
+            };
+
+            var askData = sendToRippleNet(Helpers.SerializeJson(command));
+            if (null == askData)
+                return null;
+
+            if (!checkError(String.Format("GetOrderBookAsks({0}, {1})", counterAssetCode, counterAssetGateway), askData))
+            {
+                return null;
+            }
+
+            var asks = Helpers.DeserializeJSON<MarketDepthFiatAsksResponse>(askData);
+            if (null == asks.result)
+            {
+                _logger.AppendMessage("askData JSON is " + Environment.NewLine + askData, true, ConsoleColor.Magenta);
+                return null;
+            }
+
+            return asks.result.offers;
         }
 
         internal int PlaceBuyOrder(double price, double amount)
@@ -523,7 +558,7 @@ namespace RippleBot
         /// <summary>
         /// Cancel all orders that are not maintained by this bot and not placed manually
         /// </summary>
-        internal void CleanupZombies(int buyOrderId, int sellOrderId)
+        internal void CleanupZombies(int buyOrderId, int sellOrderId)       //TODO: there's too much dependency on XRP. Rewrite it so it's more general
         {
             var offerList = getActiveOrders();
             if (null == offerList || null == offerList.result)
@@ -537,18 +572,15 @@ namespace RippleBot
                     //TODO: This is really stupid!! Find some way how to safely flag manual/bot orders
                     _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, possibly manual", true, ConsoleColor.Cyan);
                 }
-                else if (-1 != buyOrderId && buyOrderId == offer.seq)
+                else if ((-1 != buyOrderId && buyOrderId == offer.seq) || (-1 != sellOrderId && sellOrderId == offer.seq))
                 {
-                    _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, our BUY order", false);
-                }
-                else if (-1 != sellOrderId && sellOrderId == offer.seq)
-                {
-                    _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, our SELL order", false);
+                    //Our own buy/sell order
+                    continue;
                 }
                 else
                 {
-                    _logger.AppendMessage(String.Format("Identified {0} zombie order with ID={1} ({2} XRP for {3} {4}). Trying to cancel...",
-                                                        offer.Type, offer.seq, offer.AmountXrp, offer.Price, offer.Currency), true, ConsoleColor.Yellow);
+                    _logger.AppendMessage(String.Format("Identified zombie order with ID={0} ({1} assets for {2} {3}). Trying to cancel...",
+                                                        offer.seq, offer.AmountXrp, offer.Price, offer.Currency), true, ConsoleColor.Yellow);
                     //Found offer abandoned by this bot, try to cancel it
                     if (CancelOrder(offer.seq))
                         _logger.AppendMessage("... success", true, ConsoleColor.Cyan);

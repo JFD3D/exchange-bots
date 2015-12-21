@@ -57,6 +57,7 @@
     <Compile Include="Business\DataApi\Candles.cs" />
     <Compile Include="Business\Market.cs" />
     <Compile Include="Business\MarketDepthAsks.cs" />
+    <Compile Include="Business\MarketDepthFiatAsksResponse.cs" />
     <Compile Include="Business\MarketDepthRequest.cs" />
     <Compile Include="Business\Error.cs" />
     <Compile Include="Business\MarketDepthBids.cs" />
@@ -76,6 +77,7 @@
     <None Include="DataSamples\WebSocket API\account_lines.json" />
     <None Include="DataSamples\WebSocket API\book_offers.asks.json" />
     <None Include="DataSamples\WebSocket API\book_offers.bids.json" />
+    <None Include="DataSamples\WebSocket API\book_offers.fiat.asks.json" />
     <None Include="DataSamples\WebSocket API\createOffer.buy.error.json" />
     <None Include="DataSamples\WebSocket API\createOffer.buy.json" />
     <None Include="DataSamples\WebSocket API\Error.json" />

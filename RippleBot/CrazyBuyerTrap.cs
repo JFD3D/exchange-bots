@@ -141,7 +141,7 @@ namespace RippleBot
                 }
                 else
                 {
-                    //Check if cancelled by Ripple due to "lack of funds"
+                    //Check if cancelled by server due to "lack of funds"
                     var balance = _requestor.GetXrpBalance();
                     if (balance.eq(_xrpBalance, 0.1))
                     {
@@ -269,8 +269,8 @@ namespace RippleBot
 
         private double suggestSellPrice(Market market)
         {
-            const int decPlaces = 14;
-            double increment = Math.Pow(10.0, -1.0 * decPlaces); // 0.00000000000001;
+            const int DEC_PLACES = 14;
+            double increment = Math.Pow(10.0, -1.0 * DEC_PLACES); // 0.00000000000001;
 
             double sum = 0;
             var highestBid = market.Bids.First().Price;
@@ -279,7 +279,7 @@ namespace RippleBot
             {
                 if (sum + _operativeAmount > _volumeWall && ask.Price - _minDifference > highestBid)
                 {
-                    double sellPrice = Math.Round(ask.Price - increment, decPlaces);
+                    double sellPrice = Math.Round(ask.Price - increment, DEC_PLACES);
 
                     //The difference is too small and we'd be not the first SELL order. Leave previous price to avoid server call
                     if (-1 != _sellOrderId && sellPrice > market.Asks[0].Price && Math.Abs(sellPrice - _sellOrderPrice) < _minPriceUpdate)
@@ -293,7 +293,7 @@ namespace RippleBot
                 sum += ask.Amount;
 
                 //Don't consider volume of own order
-                if (Configuration.AccessKey == ask.Account && ask.Sequence == _sellOrderId/*ask.Price.eq(_sellOrderPrice)*/)
+                if (Configuration.AccessKey == ask.Account && ask.Sequence == _sellOrderId)
                     sum -= _sellOrderAmount;
             }
 
@@ -301,7 +301,7 @@ namespace RippleBot
             var price = market.Asks.Last().Price - increment;
             if (-1 != _sellOrderId && Math.Abs(price - _sellOrderPrice) < _minPriceUpdate)
                 return _sellOrderPrice;
-            return Math.Round(price, decPlaces);
+            return Math.Round(price, DEC_PLACES);
         }
 
         private double suggestBuyPrice(Market market)
@@ -314,7 +314,7 @@ namespace RippleBot
             foreach (var bid in market.Bids)
             {
                 //Don't count self
-                if (Configuration.AccessKey == bid.Account && bid.Sequence == _buyOrderId /*bid.Price.eq(_buyOrderPrice) && bid.Amount.eq(_buyOrderAmount)*/)
+                if (Configuration.AccessKey == bid.Account && bid.Sequence == _buyOrderId)
                     continue;
                 //Skip BUY orders with tiny amount
                 sumVolume += bid.Amount;

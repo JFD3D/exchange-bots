@@ -89,12 +89,18 @@ namespace RippleBot
 
                 //Filled or cancelled
                 if (baseOrder.Closed)
-                {                    
-                    if (baseBalance.eq(_baseOrderAmount, 0.1))
+                {
+                    if (baseBalance.eq(_baseOrderAmount, 0.1) && _baseOrderAmount > _threshold)
                     {
                         log("BASE order ID={0} closed but asset validation failed (balance={1} {2}). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _baseOrderId, baseBalance, _currency);
                         createBaseOrder(baseBalance);
+
+                        if (-1 != _baseOrderId)
+                        {
+                            log("Created BASE order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {2}.{5}",
+                                ConsoleColor.Cyan, _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName, _baseSellPrice, _arbGatewayName);
+                        }
                     }
                     else
                     {
@@ -137,6 +143,13 @@ namespace RippleBot
                 {
                     //BASE balance increased => ARB order was (partially) filled
                     log("ARB order bought some {0}.{1} (BASE balance={2:0.0000})", ConsoleColor.Cyan, _currency, _baseGatewayName, baseBalance);
+
+                    //Increase BASE order
+                    createBaseOrder(baseBalance);
+                    if (-1 != _baseOrderId)
+                    {
+                        log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName);
+                    }
                 }
                 else
                 {
@@ -165,11 +178,17 @@ namespace RippleBot
                 //Filled or cancelled
                 if (arbOrder.Closed)
                 {
-                    if (arbBalance.eq(_arbOrderAmount, 0.1))
+                    if (arbBalance.eq(_arbOrderAmount, 0.1) && _arbOrderAmount > _threshold)
                     {
                         log("ARB order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _arbOrderId, arbBalance, _currency);
                         createArbOrder(arbBalance);
+
+                        if (-1 != _arbOrderId)
+                        {
+                            log("Created ARB order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {2}.{5}",
+                                ConsoleColor.Cyan, _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName, _arbSellPrice, _baseGatewayName);
+                        }
                     }
                     else
                     {
@@ -212,6 +231,13 @@ namespace RippleBot
                 {
                     //ARB balance increased => BASE order was (partially) filled
                     log("BASE order bought some {0}.{1} (ARB balance={2:0.0000})", ConsoleColor.Cyan, _currency, _arbGatewayName, arbBalance);
+
+                    //Increase ARB order
+                    createArbOrder(arbBalance);
+                    if (-1 != _arbOrderId)
+                    {
+                        log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName);
+                    }
                 }
                 else
                 {

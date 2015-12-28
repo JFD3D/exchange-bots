@@ -1,0 +1,46 @@
+﻿{
+  "result": "success",
+  "ledger_index": 17949441,
+  "close_time": "2015-12-28T23:31:42Z",
+  "limit": 200,
+  "orders": [
+    {
+      "specification": {
+        "direction": "buy",
+        "quantity": {
+          "currency": "XRP",
+          "value": "16000"
+        },
+        "totalPrice": {
+          "currency": "JPY",
+          "value": "11009.9753072",
+          "counterparty": "r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN"
+        }
+      },
+      "properties": {
+        "maker": "rL3iwiaRjQoPXZD1U7hNGSsSj3sj3CoYNg",
+        "sequence": 15838,
+        "makerExchangeRate": "1.453227600750091"
+      }
+    },
+    {
+      "specification": {
+        "direction": "buy",
+        "quantity": {
+          "currency": "JPY",
+          "value": "71283.6",
+          "counterparty": "r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN"
+        },
+        "totalPrice": {
+          "currency": "XRP",
+          "value": "90000"
+        }
+      },
+      "properties": {
+        "maker": "rL3iwiaRjQoPXZD1U7hNGSsSj3sj3CoYNg",
+        "sequence": 19847,
+        "makerExchangeRate": "0.79204"
+      }
+    }
+  ]
+}

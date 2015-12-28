@@ -79,7 +79,7 @@ namespace RippleBot
             return Helpers.DeserializeJSON<ServerStateResponse>(data);
         }
 
-        internal double GetBalance2(string assetCode)       //TODO: no 2 suffix
+        internal double GetBalance(string assetCode)
         {
             var url = String.Format("{0}/accounts/{1}/balances", DATA_API_URL, _walletAddress);
 
@@ -93,29 +93,6 @@ namespace RippleBot
             }
 
             return balanceData.Asset(assetCode);
-        }
-
-        internal double GetBalance(string currencyCode)
-        {
-            var command = new AccountLinesRequest { account = _walletAddress };
-
-            var data = sendToRippleNet(Helpers.SerializeJson(command));
-
-            if (null == data)
-                return -1.0;
-
-            if (!checkError("GetBalance("+currencyCode+")", data))
-                return -1.0;
-
-            var account = Helpers.DeserializeJSON<AccountLinesResponse>(data);
-            if (null == account.result.lines)
-                return -1.0;
-
-            var theLine = account.result.lines.SingleOrDefault(line => line.account == _issuerAddress && line.currency == currencyCode);
-            if (null == theLine)
-                return -1.0;
-
-            return theLine.Balance;
         }
 
         internal Offer GetOrderInfo(int orderId)
@@ -592,7 +569,7 @@ namespace RippleBot
 
         #region private helpers
 
-        private OffersResponse getActiveOrders()
+        private OffersResponse getActiveOrders()        //TODO: rework to use DATA API instead of websockets
         {
             var command = new OrderInfoRequest { id = 1, account = _walletAddress };
 

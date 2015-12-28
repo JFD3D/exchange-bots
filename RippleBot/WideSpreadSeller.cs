@@ -142,7 +142,7 @@ namespace RippleBot
                     else
                     {
                         //Check if cancelled by Ripple due to "lack of funds"
-                        var balance = _requestor.GetXrpBalance();
+                        var balance = _requestor.GetBalance2(Const.NATIVE_ASSET);
                         if (balance.eq(_xrpBalance, 0.1))
                         {
                             log("SELL order ID={0} closed but asset validation failed (balance={1} XRP). Asuming was cancelled, trying to recreate",
@@ -208,7 +208,7 @@ namespace RippleBot
                     else
                     {
                         //Check if cancelled by Ripple due to "lack of funds"
-                        var balance = _requestor.GetXrpBalance();
+                        var balance = _requestor.GetBalance2(Const.NATIVE_ASSET);
                         if (balance.eq(_xrpBalance, 0.1))
                         {
                             log("BUY order ID={0} closed but asset validation failed (balance={1} XRP). Asuming was cancelled, trying to recreate",
@@ -230,9 +230,9 @@ namespace RippleBot
                 }
             }
 
-            _xrpBalance = _requestor.GetXrpBalance();
+            _xrpBalance = _requestor.GetBalance2(Const.NATIVE_ASSET);
             log("### Balance= {0} XRP", _xrpBalance);
-            log(new string('=', 84));
+            log(new string('=', 74));
         }
 
         private double getLowestAsk(Market market)

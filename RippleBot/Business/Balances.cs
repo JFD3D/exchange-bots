@@ -10,23 +10,23 @@ namespace RippleBot.Business
     [DataContract]
     internal class BalancesResponse
     {
-        [DataMember] internal bool success { get; set; }
+        [DataMember] internal string result { get; set; }
+        [DataMember] internal int ledger_index { get; set; }
+        [DataMember] internal string close_time { get; set; }
+        [DataMember] internal int limit { get; set; }
+
         [DataMember] internal List<Balance> balances { get; set; }
 
-        internal double AvailableXrp
+        internal bool IsError
         {
-            get
-            {
-                return balances.First(bal => "XRP" == bal.currency).Available;
-            }
+            get { return "success" != result; }
         }
 
-        internal double AvailableUsd
+        /// <summary>Get asset balance by its code</summary>
+        /// <param name="assetCode">XRP, USD, CNY...</param>
+        internal double Asset(string assetCode)
         {
-            get
-            {
-                return balances.First(bal => "USD" == bal.currency).Available;
-            }
+            return balances.First(bal => assetCode == bal.currency).Available;
         }
     }
 

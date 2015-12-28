@@ -1,7 +1,8 @@
-﻿using Common;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
+
+using Common;
 
 
 namespace RippleBot

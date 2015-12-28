@@ -67,7 +67,7 @@ namespace RippleBot
 
             var baseBalance = _baseRequestor.GetBalance(_baseCurrency);
             var arbBalance = _arbRequestor.GetBalance(_arbCurrency);
-            var xrpBalance = _baseRequestor.GetXrpBalance();
+            var xrpBalance = _baseRequestor.GetBalance2(Const.NATIVE_ASSET);
             log("Balances: {0:0.000} {1}; {2:0.000} {3}; {4:0.000} XRP", baseBalance, _baseCurrency, arbBalance, _arbCurrency, xrpBalance);
 
             var lowestBaseAsk = TradeHelper.GetFirstLiquidOrder(baseMarket.Asks, MIN_TRADE_VOLUME);
@@ -106,7 +106,7 @@ namespace RippleBot
 
                     if (null != orderInfo &&orderInfo.Closed)
                     {
-                        var newXrpBalance = _baseRequestor.GetXrpBalance();
+                        var newXrpBalance = _baseRequestor.GetBalance2(Const.NATIVE_ASSET);
                         amount = newXrpBalance - xrpBalance;
                         log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                         amount -= 0.048;    //So we don't fall into "lack of funds" due to fees
@@ -159,7 +159,7 @@ namespace RippleBot
 
                     if (null != orderInfo && orderInfo.Closed)
                     {
-                        var newXrpBalance = _arbRequestor.GetXrpBalance();
+                        var newXrpBalance = _arbRequestor.GetBalance2(Const.NATIVE_ASSET);
                         amount = newXrpBalance - xrpBalance;
                         log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                         //Try to sell XRP for BASIC

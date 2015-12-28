@@ -1,0 +1,37 @@
+﻿{
+  "result": "success",
+  "ledger_index": 17948568,
+  "close_time": "2015-12-28T22:24:30Z",
+  "limit": 200,
+  "balances": [
+    {
+      "currency": "XRP",
+      "value": "131.613374"
+    },
+    {
+      "currency": "KRW",
+      "counterparty": "rUkMKjQitpgAM5WTGk79xpjT38DEJY283d",
+      "value": "0"
+    },
+    {
+      "currency": "CNY",
+      "counterparty": "rnuF96W4SZoCJmbHYBFoJZpR8eCaxNvekK",
+      "value": "0.0000081862669"
+    },
+    {
+      "currency": "JPY",
+      "counterparty": "r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN",
+      "value": "0"
+    },
+    {
+      "currency": "CNY",
+      "counterparty": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y",
+      "value": "0"
+    },
+    {
+      "currency": "CNY",
+      "counterparty": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA",
+      "value": "9.68277"
+    }
+  ]
+}

@@ -17,7 +17,9 @@ namespace RippleBot
     internal class RippleApi : IDisposable
     {
         private const int SOCKET_TIMEOUT = 12000;
-        private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";
+        private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";      //TODO: delete
+        private const string DATA_API_URL = "https://data.ripple.com/v2";
+        private const int DATA_TIMEOUT = 40 * 1000;     //40sec timeout for data API
         private const byte RETRY_COUNT = 10;
         private const int RETRY_DELAY = 2000;
         private const string MANUAL_ORDER_SIGN = "12345";
@@ -77,23 +79,20 @@ namespace RippleBot
             return Helpers.DeserializeJSON<ServerStateResponse>(data);
         }
 
-        internal double GetXrpBalance()
+        internal double GetBalance2(string assetCode)       //TODO: no 2 suffix
         {
-            var command = new AccountInfoRequest { account = _walletAddress };
+            var url = String.Format("{0}/accounts/{1}/balances", DATA_API_URL, _walletAddress);
 
-            var data = sendToRippleNet(Helpers.SerializeJson(command));
+            var webClient = new WebClient2(_logger, DATA_TIMEOUT);
 
-            if (null == data)
+            BalancesResponse balanceData = webClient.DownloadObject<BalancesResponse>(url);
+
+            if (null == balanceData || balanceData.IsError || null == balanceData.balances)
+            {
                 return -1.0;
+            }
 
-            if (!checkError("GetXrpBalance", data))
-                return -1.0;
-
-            var account = Helpers.DeserializeJSON<AccountInfoResponse>(data);
-            if (null == account.result || null == account.result.account_data)
-                return -1.0;
-
-            return account.result.account_data.BalanceXrp;
+            return balanceData.Asset(assetCode);
         }
 
         internal double GetBalance(string currencyCode)

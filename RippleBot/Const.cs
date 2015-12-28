@@ -5,6 +5,9 @@ namespace RippleBot
 {
     internal static class Const
     {
+        /// <summary>Code of native asset, i.e. ripple</summary>
+        internal const string NATIVE_ASSET = "XRP";
+
         /// <summary>Number of 'drops' (smallest value that can be in a transaction) in one XRP</summary>
         internal const double DROPS_IN_XRP = 1000000.0;
 

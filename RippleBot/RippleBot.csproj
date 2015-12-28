@@ -75,6 +75,7 @@
     <Compile Include="WideSpreadSeller.cs" />
     <None Include="DataSamples\Data API\GET_balances.json" />
     <None Include="DataSamples\Data API\GET_exchanges.json" />
+    <None Include="DataSamples\Data API\GET_orders.json" />
     <None Include="DataSamples\WebSocket API\account_info.json" />
     <None Include="DataSamples\WebSocket API\account_lines.json" />
     <None Include="DataSamples\WebSocket API\book_offers.asks.json" />

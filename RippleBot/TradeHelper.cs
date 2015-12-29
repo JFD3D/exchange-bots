@@ -10,63 +10,20 @@ namespace RippleBot
 {
     internal class TradeHelper
     {
-        /// <summary>Returns numeric indicator of market activity. Higher value means higher activity (i.e. lot of trades with higher volume).</summary>
-        /// <param name="candles">Recent trading statistics</param>
+        /// <summary>
+        /// Returns numeric indicator of market activity between 0 and 1 inclusive. Higher value means
+        /// higher activity (i.e. lot of trades with higher volume).
+        /// </summary>
+        /// <param name="tradeHistory">Recent trading statistics</param>
+        /// <param name="assetCode">Asset code to evaluate volume for</param>
+        /// <param name="minAverageVolume">
+        /// Trade volume under this threshold is considered negligible (resulting madness will be at most 0.5)
+        /// </param>
+        /// <param name="maxAverageVolume">
+        /// Trade volume above this threshold is considered very high (resulting madness will be at least 0.5)
+        /// </param>
         /// <returns>Coeficient in [0.0, 1.0] where 0.0 means totally peacefull market, 1.0 is wild.</returns>
-        internal static float GetMadness(List<Candle> candles)
-        {
-            //Bad response or no recent trading
-            if (null == candles || !candles.Any())
-                return 0.0f;
-
-            var last5mCandle = candles.Last();
-
-            //Last candle is too old
-            if (last5mCandle.StartTime < DateTime.Now.Subtract(new TimeSpan(0, 5, 0)))
-                return 0.0f;
-
-            //Last candle has just been open, merge it with previous
-            if (last5mCandle.IsPartial)
-            {
-                if (candles.Count > 1)
-                {
-                    var beforeLast = candles[candles.Count - 2];
-                    last5mCandle = new Candle
-                    {
-                        startTime = beforeLast.startTime,
-                        count = beforeLast.count + last5mCandle.count,
-                        baseVolume = beforeLast.baseVolume + last5mCandle.count
-                    };
-                }
-            }
-
-            const int MIN_TRADES = 2;
-            const int MAX_TRADES = 10;
-            float intenseCoef;
-            if (last5mCandle.count < MIN_TRADES)        //Too few trades
-                intenseCoef = 0.0f;
-            else if (last5mCandle.count >= MAX_TRADES)  //Too many trades
-                intenseCoef = 1.0f;
-            else
-                intenseCoef = (float)(last5mCandle.count - MIN_TRADES) / (MAX_TRADES - MIN_TRADES);
-
-            const double MIN_AVG_VOLUME = 400.0;
-            const double MAX_AVG_VOLUME = 3000.0;
-            float volumeCoef;
-            double avgVolume = last5mCandle.baseVolume / last5mCandle.count;
-
-            if (avgVolume < MIN_AVG_VOLUME)
-                volumeCoef = 0.0f;
-            else if (avgVolume >= MAX_AVG_VOLUME)
-                volumeCoef = 1.0f;
-            else
-                volumeCoef = (float)((avgVolume - MIN_AVG_VOLUME) / (MAX_AVG_VOLUME - MIN_AVG_VOLUME));
-
-            //Average of volume and frequency coeficients
-            return (intenseCoef + volumeCoef) / 2;
-        }
-
-        internal static float GetMadness2(ExchangeHistoryResponse tradeHistory, int minAverageVolume, int maxAverageVolume)
+        internal static float GetMadness(ExchangeHistoryResponse tradeHistory, string assetCode, double minAverageVolume, double maxAverageVolume)
         {
             //Bad response or no recent trading
             if (null == tradeHistory || !tradeHistory.exchanges.Any())
@@ -116,13 +73,35 @@ namespace RippleBot
                 intenseCoef = (float)(1.0 - (averageAge / totalTimeSpan));
             }
 
+            float volumeCoef;
+            //Count average volume
+            double volumeSum = 0.0;
 
-            //TODO: float volumeCoef; count average volume
+            foreach (Exchange trade in tradeHistory.exchanges)
+            {
+                double amount = assetCode == trade.base_currency
+                                    ? Double.Parse(trade.base_amount)
+                                    : Double.Parse(trade.counter_amount);
+                volumeSum += amount;
+            }
 
+            double avgVolume = volumeSum / tradeHistory.exchanges.Count;
 
+            if (avgVolume < minAverageVolume)
+            {
+                volumeCoef = 0.0f;
+            }
+            else if (avgVolume >= maxAverageVolume)
+            {
+                volumeCoef = 1.0f;
+            }
+            else
+            {
+                volumeCoef = (float)((avgVolume - minAverageVolume) / (maxAverageVolume - minAverageVolume));
+            }
 
             //Average of volume and frequency coeficients
-            return (intenseCoef + volumeCoef) / 2;
+            return (intenseCoef + volumeCoef) / 2.0f;
         }
 
         /// <summary>

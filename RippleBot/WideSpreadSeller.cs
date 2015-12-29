@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+
 using Common;
 using RippleBot.Business;
+using RippleBot.Business.DataApi;
 
 
 namespace RippleBot
@@ -13,6 +15,9 @@ namespace RippleBot
     internal class WideSpreadSeller : TraderBase
     {
         private RippleApi _requestor;
+
+        private string _gateway;
+        private string _currencyCode;
 
         //BTC amount to trade
         private double _operativeAmount;
@@ -48,15 +53,18 @@ namespace RippleBot
 
         protected override void Initialize()
         {
+            _gateway = "rnuF96W4SZoCJmbHYBFoJZpR8eCaxNvekK"/*RippleCN.com*/;        //TODO: Simply no
+            _currencyCode = "CNY";                                                  //TODO: I say no
+
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             log("Wide spread trader for RippleCN initialized with operative={0}; MinSpread={1}", _operativeAmount, MIN_SPREAD);
-            _requestor = new RippleApi(_logger, "rnuF96W4SZoCJmbHYBFoJZpR8eCaxNvekK"/*RippleCN.com*/, "CNY");
+            _requestor = new RippleApi(_logger, _gateway, _currencyCode);
             _requestor.Init();
         }
 
         protected override void Check()
         {
-            var candles = _requestor.GetTradeStatistics(new TimeSpan(2, 0, 0));
+            ExchangeHistoryResponse tradeHistory = _requestor.GetTradeStatistics2(Const.NATIVE_ASSET, null, _currencyCode, _gateway);
             var market = _requestor.GetMarketDepth();
 
             if (null == market)
@@ -64,7 +72,7 @@ namespace RippleBot
 
             var spread = Math.Round(getLowestAsk(market) - getHighestBid(market), 5);
 
-            var coef = TradeHelper.GetMadness(candles.results);
+            float coef = TradeHelper.GetMadness(tradeHistory, Const.NATIVE_ASSET, 500.0, 3000.0);
             _intervalMs = Helpers.SuggestInterval(coef, 8000, 20000);
             log("Madness={0}; spread={1:F5} XRP; Interval={2} ms", coef, spread, _intervalMs);
 

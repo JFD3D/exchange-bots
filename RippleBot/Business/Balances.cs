@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace RippleBot.Business
 {
-    //TODO: where is this used?!
     [DataContract]
     internal class BalancesResponse
     {
@@ -14,7 +13,6 @@ namespace RippleBot.Business
         [DataMember] internal int ledger_index { get; set; }
         [DataMember] internal string close_time { get; set; }
         [DataMember] internal int limit { get; set; }
-
         [DataMember] internal List<Balance> balances { get; set; }
 
         internal bool IsError

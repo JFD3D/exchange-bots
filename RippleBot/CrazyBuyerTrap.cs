@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+
 using Common;
 using RippleBot.Business;
+using RippleBot.Business.DataApi;
 
 
 namespace RippleBot
@@ -14,6 +16,7 @@ namespace RippleBot
         private double _operativeAmount;
         private double _minWallVolume;
         private double _maxWallVolume;
+        private string _gateway;
         //Volumen of XRP necessary to accept our offer
         private double _volumeWall;
         //Minimum difference between BUY price and subsequent SELL price (so we have at least some profit). Value from config.
@@ -54,9 +57,11 @@ namespace RippleBot
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
             _maxWallVolume = double.Parse(Configuration.GetValue("max_volume"));
-            var gateway = Configuration.GetValue("gateway_address");
-            if (null == gateway)
+            _gateway = Configuration.GetValue("gateway_address");
+            if (null == _gateway)
+            {
                 throw new Exception("Configuration key 'gateway_address' missing");
+            }
             _currencyCode = Configuration.GetValue("currency_code");
             if (null == _currencyCode)
                 throw new Exception("Configuration key 'currency_code' missing");
@@ -65,7 +70,7 @@ namespace RippleBot
             var cleanup = Configuration.GetValue("cleanup_zombies");
             _cleanup = bool.Parse(cleanup ?? false.ToString());
 
-            _requestor = new RippleApi(_logger, gateway, _currencyCode);
+            _requestor = new RippleApi(_logger, _gateway, _currencyCode);
             _requestor.Init();
             log("CST trader started for currency {0} with operative={1}; MinWall={2}; MaxWall={3}",
                 _currencyCode, _operativeAmount, _minWallVolume, _maxWallVolume);
@@ -73,13 +78,13 @@ namespace RippleBot
 
         protected override void Check()
         {
-            var candles = _requestor.GetTradeStatistics(new TimeSpan(2, 0, 0));
+            ExchangeHistoryResponse tradeHistory = _requestor.GetTradeStatistics2(Const.NATIVE_ASSET, null, _currencyCode, _gateway);
             var market = _requestor.GetMarketDepth();
 
             if (null == market)
                 return;
 
-            var coef = TradeHelper.GetMadness(candles.results);
+            float coef = TradeHelper.GetMadness(tradeHistory, Const.NATIVE_ASSET, 500.0, 3000.0);
             _volumeWall = Helpers.SuggestWallVolume(coef, _minWallVolume, _maxWallVolume);
             _intervalMs = Helpers.SuggestInterval(coef, 8000, 20000);
             log("Madness={0}; Volume={1} XRP; Interval={2} ms", coef, _volumeWall, _intervalMs);

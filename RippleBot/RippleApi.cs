@@ -18,8 +18,8 @@ namespace RippleBot
     internal class RippleApi : IDisposable
     {
         private const int SOCKET_TIMEOUT = 12000;
-        private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";      //TODO: delete
-        private const string DATA_API_URL = "https://data.ripple.com/v2";
+//TODO:delete        private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";
+        private const string DATA_API_URL = "https://data.ripple.com/v2";           //TODO: config value
         private const int DATA_TIMEOUT = 40 * 1000;     //40sec timeout for data API
         private const byte RETRY_COUNT = 10;
         private const int RETRY_DELAY = 2000;
@@ -141,10 +141,14 @@ namespace RippleBot
 
             var bidData = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == bidData)
+            {
                 return null;
+            }
 
             if (!checkError("GetMarketDepth", bidData))
+            {
                 return null;
+            }
 
             var bids = Helpers.DeserializeJSON<MarketDepthBidsResponse>(bidData);
             if (null == bids.result)
@@ -163,10 +167,14 @@ namespace RippleBot
 
             var askData = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == askData)
+            {
                 return null;
+            }
 
             if (!checkError("GetMarketDepth", askData))
+            {
                 return null;
+            }
 
             var asks = Helpers.DeserializeJSON<MarketDepthAsksResponse>(askData);
             if (null == asks.result)
@@ -245,7 +253,9 @@ namespace RippleBot
                 var data = sendToRippleNet(Helpers.SerializeJson(command));
 
                 if (null == data)
+                {
                     return -1;
+                }
 
                 error = Helpers.DeserializeJSON<ErrorResponse>(data);
                 if (!String.IsNullOrEmpty(error.error))
@@ -293,7 +303,9 @@ namespace RippleBot
             {
                 var id = PlaceBuyOrder(price, amount);
                 if (-1 == id)
+                {
                     return orderId;
+                }
                 return id;
             }
 
@@ -333,7 +345,9 @@ namespace RippleBot
                 var data = sendToRippleNet(Helpers.SerializeJson(command));
 
                 if (null == data)
+                {
                     return -1;
+                }
 
                 error = Helpers.DeserializeJSON<ErrorResponse>(data);
                 if (!String.IsNullOrEmpty(error.error))
@@ -380,7 +394,9 @@ namespace RippleBot
             {
                 var id = PlaceSellOrder(price, ref amount);
                 if (-1 == id) //Socket problem
+                {
                     return orderId;
+                }
                 return id;
             }
 
@@ -532,6 +548,7 @@ namespace RippleBot
         }
 
 
+/*TODO:delete
         /// <summary>Get trade statistics</summary>
         /// <param name="age">First candle will start on now-age</param>
         internal CandlesResponse GetTradeStatistics(TimeSpan age)
@@ -551,20 +568,21 @@ namespace RippleBot
             var data = sendPostRequest("offers_exercised", jsonParams);
             return Helpers.DeserializeJSON<CandlesResponse>(data);
         }
-
-        internal ExchangeHistoryResponse GetTradeStatistics2(string assetCode1, string assetGateway1, string assetCode2, string assetGateway2)
+*/
+        /// <summary>Get recent trades of asset pair</summary>
+        internal ExchangeHistoryResponse GetTradeStatistics2(string baseAssetCode, string gaseAssetGateway, string counterAsset, string counterAssetGateway)
         {
             var webClient = new WebClient2(_logger, DATA_TIMEOUT);
 
-            string assetDef1 = assetCode1;
-            if (!String.IsNullOrEmpty(assetGateway1))
+            string assetDef1 = baseAssetCode;
+            if (!String.IsNullOrEmpty(gaseAssetGateway))
             {
-                assetDef1 += "+" + assetGateway1;
+                assetDef1 += "+" + gaseAssetGateway;
             }
-            string assetDef2 = assetCode2;
-            if (!String.IsNullOrEmpty(assetGateway2))
+            string assetDef2 = counterAsset;
+            if (!String.IsNullOrEmpty(counterAssetGateway))
             {
-                assetDef2 += "+" + assetGateway2;
+                assetDef2 += "+" + counterAssetGateway;
             }
 
             const int limit = 10;
@@ -733,6 +751,7 @@ namespace RippleBot
             }
         }
 
+/*TODO:delete
         private string sendPostRequest(string method, string postData)
         {
             string address = CHARTS_BASE_URL + method;
@@ -784,6 +803,7 @@ namespace RippleBot
 
             throw new Exception(String.Format("Web request failed {0} times in a row with error '{1}'. Giving up.", RETRY_COUNT, exc.Message));
         }
+*/
         #endregion
     }
 }

@@ -50,6 +50,7 @@
     <Compile Include="ArbitrageTrader.cs" />
     <Compile Include="Business\AccountInfo.cs" />
     <Compile Include="Business\AccountLinesRequest.cs" />
+    <Compile Include="Business\AccountOrdersResponse.cs" />
     <Compile Include="Business\Balances.cs" />
     <Compile Include="Business\CancelOrder.cs" />
     <Compile Include="Business\CancelOrderRequest.cs" />

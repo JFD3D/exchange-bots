@@ -92,18 +92,20 @@ namespace RippleBot
             //We have active BUY order
             if (-1 != _buyOrderId)
             {
-                var buyOrder = _requestor.GetOrderInfo(_buyOrderId);
+                Order buyOrder = _requestor.GetOrderInfo2(_buyOrderId);
 
                 if (null == buyOrder)
+                {
                     return;
+                }
 
                 //The order is still open
                 if (!buyOrder.Closed)
                 {
                     //Untouched
-                    if (buyOrder.AmountXrp.eq(_buyOrderAmount))
+                    if (buyOrder.Amount(Const.NATIVE_ASSET).eq(_buyOrderAmount))
                     {
-                        log("BUY order ID={0} untouched (amount={1} XRP, price={2} {3})", _buyOrderId, _buyOrderAmount, _buyOrderPrice, buyOrder.Currency);
+                        log("BUY order ID={0} untouched (amount={1} XRP, price={2} {3})", _buyOrderId, _buyOrderAmount, _buyOrderPrice, _currencyCode);
 
                         double price = suggestBuyPrice(market);
                         var newAmount = _operativeAmount - _sellOrderAmount;
@@ -114,18 +116,18 @@ namespace RippleBot
                             _buyOrderAmount = newAmount;
                             _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, newAmount);
                             _buyOrderPrice = price;
-                            log("Updated BUY order ID={0}; amount={1} XRP; price={2} {3}", _buyOrderId, _buyOrderAmount, price, buyOrder.Currency);
+                            log("Updated BUY order ID={0}; amount={1} XRP; price={2} {3}", _buyOrderId, _buyOrderAmount, price, _currencyCode);
                         }
                     }
                     else    //Partially filled
                     {
-                        _executedBuyPrice = buyOrder.Price;
-                        _buyOrderAmount = buyOrder.AmountXrp;
+                        _executedBuyPrice = _buyOrderPrice; //TODO:DEL  buyOrder.BuyPrice(Const.NATIVE_ASSET);
+                        _buyOrderAmount = buyOrder.Amount(Const.NATIVE_ASSET);
                         log("BUY order ID={0} partially filled at price={1} {2}. Remaining amount={3} XRP;",
-                            ConsoleColor.Green, _buyOrderId, _executedBuyPrice, buyOrder.Currency, buyOrder.AmountXrp);
+                            ConsoleColor.Green, _buyOrderId, _executedBuyPrice, _currencyCode, buyOrder.Amount(Const.NATIVE_ASSET));
 
                         //Check remaining amount, drop the BUY if it's very tiny
-                        if (buyOrder.AmountXrp < MIN_ORDER_AMOUNT)
+                        if (buyOrder.Amount(Const.NATIVE_ASSET) < MIN_ORDER_AMOUNT)
                         {
                             log("The remaining BUY amount is too small, canceling the order ID={0}", ConsoleColor.Cyan, _buyOrderId);
                             _requestor.CancelOrder(_buyOrderId);    //Note: no problem if the cancel fails, the breadcrumbs can live own life
@@ -137,9 +139,9 @@ namespace RippleBot
                         {
                             var price = suggestBuyPrice(market);
                             //The same price is totally unlikely, so we don't check it here
-                            _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, buyOrder.AmountXrp);
+                            _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, buyOrder.Amount(Const.NATIVE_ASSET));
                             _buyOrderPrice = price;
-                            log("Updated BUY order ID={0}; amount={1} XRP; price={2} {3}", _buyOrderId, _buyOrderAmount, _buyOrderPrice, buyOrder.Currency); 
+                            log("Updated BUY order ID={0}; amount={1} XRP; price={2} {3}", _buyOrderId, _buyOrderAmount, _buyOrderPrice, _currencyCode);
                         }
                     }
                 }
@@ -189,26 +191,28 @@ namespace RippleBot
                 //SELL order already existed
                 if (-1 != _sellOrderId)
                 {
-                    var sellOrder = _requestor.GetOrderInfo(_sellOrderId);
+                    Order sellOrder = _requestor.GetOrderInfo2(_sellOrderId);
 
                     if (null == sellOrder)
+                    {
                         return;
+                    }
 
                     //The order is still open
                     if (!sellOrder.Closed)
                     {
-                        log("SELL order ID={0} open (amount={1} XRP, price={2} {3})", _sellOrderId, sellOrder.AmountXrp, _sellOrderPrice, sellOrder.Currency);
+                        log("SELL order ID={0} open (amount={1} XRP, price={2} {3})", _sellOrderId, sellOrder.Amount(Const.NATIVE_ASSET), _sellOrderPrice, _currencyCode);
 
                         double price = suggestSellPrice(market);
 
                         //Partially filled
-                        if (!sellOrder.AmountXrp.eq(_sellOrderAmount))
+                        if (!sellOrder.Amount(Const.NATIVE_ASSET).eq(_sellOrderAmount))
                         {
                             log("SELL order ID={0} partially filled at price={1} {2}. Remaining amount={3} XRP;",
-                                ConsoleColor.Green, _sellOrderId, sellOrder.Price, sellOrder.Currency, sellOrder.AmountXrp);
+                                ConsoleColor.Green, _sellOrderId, /*TODO:DEL 1.0/sellOrder.BuyPrice(_currencyCode)*/_sellOrderPrice, _currencyCode, sellOrder.Amount(Const.NATIVE_ASSET));
 
                             //Check remaining amount, drop the SELL if it's very tiny
-                            if (sellOrder.AmountXrp < MIN_ORDER_AMOUNT)
+                            if (sellOrder.Amount(Const.NATIVE_ASSET) < MIN_ORDER_AMOUNT)
                             {
                                 log("The remaining SELL amount is too small, canceling the order ID={0}", ConsoleColor.Cyan, _sellOrderId);
                                 _requestor.CancelOrder(_sellOrderId);    //Note: no problem if the cancel fails, the breadcrumbs can live own life
@@ -217,11 +221,11 @@ namespace RippleBot
                             }
                             else
                             {
-                                var amount = sellOrder.AmountXrp;
+                                var amount = sellOrder.Amount(Const.NATIVE_ASSET);
                                 _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, price, ref amount);
                                 _sellOrderAmount = amount;
                                 _sellOrderPrice = price;
-                                log("Updated SELL order ID={0}; amount={1} XRP; price={2} {3}", _sellOrderId, _sellOrderAmount, price, sellOrder.Currency);
+                                log("Updated SELL order ID={0}; amount={1} XRP; price={2} {3}", _sellOrderId, _sellOrderAmount, price, _currencyCode);
                             }
                         }
                         //If there were some money released by filling a BUY order, increase this SELL order
@@ -231,14 +235,14 @@ namespace RippleBot
                             _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, price, ref newAmount);
                             _sellOrderAmount = newAmount;
                             _sellOrderPrice = price;
-                            log("Updated SELL order ID={0}; amount={1} XRP; price={2} {3}", _sellOrderId, _sellOrderAmount, price, sellOrder.Currency);
+                            log("Updated SELL order ID={0}; amount={1} XRP; price={2} {3}", _sellOrderId, _sellOrderAmount, price, _currencyCode);
                         }
                         //Or if we simply need to change price.
                         else if (!_sellOrderPrice.eq(price))
                         {
                             _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, price, ref _sellOrderAmount);
                             _sellOrderPrice = price;
-                            log("Updated SELL order ID={0}; amount={1} XRP; price={2} {3}", _sellOrderId, _sellOrderAmount, price, sellOrder.Currency);
+                            log("Updated SELL order ID={0}; amount={1} XRP; price={2} {3}", _sellOrderId, _sellOrderAmount, price, _currencyCode);
                         }
                     }
                     else        //Closed or cancelled

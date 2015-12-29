@@ -111,9 +111,31 @@ namespace RippleBot
 
             //NULL means it was already filled BUG: OR CANCELLED!!! TODO: some better way of getting order status
             if (null == order)
+            {
                 return new Offer(true);
+            }
             return order;
         }
+
+        internal Order GetOrderInfo2(int orderId)
+        {
+            AccountOrdersResponse orderList = getActiveOrders2();
+
+            if (null == orderList)
+            {
+                return null;
+            }
+
+            var order = orderList.orders.FirstOrDefault(o => o.OrderId == orderId);
+
+            //NULL means it was already filled BUG: OR CANCELLED!!! TODO: some better way of getting order status
+            if (null == order)
+            {
+                return new Order(true);
+            }
+            return order;
+        }
+
 
         internal Market GetMarketDepth()
         {
@@ -590,6 +612,21 @@ namespace RippleBot
             var dataFix = _offerPattern.Replace(data, "'taker_${verb}s': {'currency': 'XRP', 'issuer':'ripple labs', 'value': '${value}'}".Replace("'", "\""));
 
             return Helpers.DeserializeJSON<OffersResponse>(dataFix);
+        }
+
+        private AccountOrdersResponse getActiveOrders2()
+        {
+            var webClient = new WebClient2(_logger, DATA_TIMEOUT);
+            var url = String.Format("{0}/accounts/{1}/orders", DATA_API_URL, _walletAddress);
+
+            AccountOrdersResponse data = webClient.DownloadObject<AccountOrdersResponse>(url);
+
+            if (null == data || null == data.orders)      //TODO: better info when server returns error?
+            {
+                return null;
+            }
+
+            return data;
         }
 
         private string sendToRippleNet(string commandData)

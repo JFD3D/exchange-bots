@@ -41,6 +41,26 @@
         "sequence": 19847,
         "makerExchangeRate": "0.79204"
       }
+    },
+    {
+      "specification": {
+        "direction": "buy",
+        "quantity": {
+          "currency": "CNY",
+          "value": "2891.95332063915",
+          "counterparty": "rKiCet8SdvWxPXnAgYarFUXMh1zCPz432Y"
+        },
+        "totalPrice": {
+          "currency": "CNY",
+          "value": "2886.77855335932",
+          "counterparty": "razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA"
+        }
+      },
+      "properties": {
+        "maker": "rL3iwiaRjQoPXZD1U7hNGSsSj3sj3CoYNg",
+        "sequence": 683,
+        "makerExchangeRate": "1.001792575074319"
+      }
     }
   ]
 }

@@ -5,6 +5,8 @@ using Common;
 
 namespace RippleBot.Business
 {
+    //TODO: delete when AccountOrders is ready and well tested
+
     [DataContract]
     internal class OffersResponse
     {

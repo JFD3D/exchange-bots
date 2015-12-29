@@ -8,6 +8,7 @@ using System.Threading;
 using WebSocket4Net;
 
 using Common;
+using Common.WebsocketProxy;
 using RippleBot.Business;
 using RippleBot.Business.DataApi;
 
@@ -46,15 +47,20 @@ namespace RippleBot
             _issuerAddress = exchIssuerAddress;
             _fiatCurreny = fiatCurrencyCode;
 
+            _webSocket = new WebSocket(_rippleSocketUri = Configuration.GetValue("server"));
+
             var proxyHost = Configuration.GetValue("proxyHost");
             var proxyPort = Configuration.GetValue("proxyPort");
             if (null != proxyHost && null != proxyPort)
             {
+                //TODO: these two lines don't belong here, rather to WebClient2
                 _webProxy = new WebProxy(proxyHost, int.Parse(proxyPort));
                 _webProxy.Credentials = CredentialCache.DefaultCredentials;
+
+                var wsProxy = new HttpConnectProxy(new DnsEndPoint(proxyHost, Int32.Parse(proxyPort)), "1.0");
+                _webSocket.Proxy = wsProxy;
             }
 
-            _webSocket = new WebSocket(_rippleSocketUri = Configuration.GetValue("server"));
             _webSocket.Opened += websocket_Opened;
             _webSocket.Error += websocket_Error;
             _webSocket.Closed += websocket_Closed;
@@ -62,13 +68,14 @@ namespace RippleBot
             _walletAddress = Configuration.AccessKey;
         }
 
-
         internal void Init()
         {
             _webSocket.Open();
 
             while (!_open)
+            {
                 Thread.Sleep(250);
+            }
         }
 
         internal ServerStateResponse GetServerState()
@@ -370,7 +377,7 @@ namespace RippleBot
         /// <param name="amount">Amount of asset this bot owns</param>        
         /// <param name="price">Unit price</param>
         /// <param name="toCurrency">Code of asset we want to purchase</param>
-        /// <param name="fromGateway">Destination gateway address</param>
+        /// <param name="toGateway">Destination gateway address</param>
         /// <returns>Order ID</returns>
         internal int PlaceOrder(double amount, double price, string toCurrency, string toGateway)
         {
@@ -684,7 +691,9 @@ namespace RippleBot
                 webRequest.Method = "POST";
 
                 if (null != _webProxy)
+                {
                     webRequest.Proxy = _webProxy;
+                }
 
                 using (var writer = new StreamWriter(webRequest.GetRequestStream()))
                 {

@@ -22,7 +22,6 @@ namespace BtceBot
         private const int TRADE_TIMEOUT = 60000;    //60s
 
         private readonly Logger _logger;
-        private readonly WebProxy _webProxy;
 
         private readonly HMACSHA512 _hashMaker;
         private long _nonce;
@@ -32,13 +31,6 @@ namespace BtceBot
         public BtceApi(Logger logger)
         {
             _logger = logger;
-            var proxyHost = Configuration.GetValue("proxyHost");
-            var proxyPort = Configuration.GetValue("proxyPort");
-            if (null != proxyHost && null != proxyPort)
-            {
-                _webProxy = new WebProxy(proxyHost, int.Parse(proxyPort));
-                _webProxy.Credentials = CredentialCache.DefaultCredentials;
-            }
 
             _hashMaker = new HMACSHA512(Encoding.ASCII.GetBytes(Configuration.SecretKey));
 
@@ -244,9 +236,6 @@ namespace BtceBot
             for (int i = 1; i <= RETRY_COUNT; i++)
             {
                 var client = new WebClient2(_logger, 20000);
-
-                if (null != _webProxy)
-                    client.Proxy = _webProxy;
 
                 try
                 {

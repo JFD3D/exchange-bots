@@ -8,6 +8,8 @@ namespace Common
     {
         private readonly int _timeout;
         private readonly Logger _logger;
+        private readonly IWebProxy _webProxy;
+        private WebRequest _request;
 
 
         /// <summary>Create new WebClient2 instance</summary>
@@ -17,15 +19,36 @@ namespace Common
         {
             _logger = logger;
             _timeout = timeout;
+
+            var proxyHost = Configuration.GetValue("proxyHost");
+            var proxyPort = Configuration.GetValue("proxyPort");
+            if (null != proxyHost && null != proxyPort)
+            {
+                _webProxy = new WebProxy(proxyHost, int.Parse(proxyPort));
+                _webProxy.Credentials = CredentialCache.DefaultCredentials;
+            }
         }
 
         protected override WebRequest GetWebRequest(Uri uri)
         {
-            WebRequest w = base.GetWebRequest(uri);
-            w.Timeout = _timeout;
-            return w;
+            _request = base.GetWebRequest(uri);
+            _request.Timeout = _timeout;
+
+            if (null != _webProxy)
+            {
+                _request.Proxy = _webProxy;
+            }
+
+            return _request;
         }
 
+
+        /// <summary>Get or set the protocol method to use in underlying request.</summary>
+        public string Method
+        {
+            get { return _request.Method; }
+            set { _request.Method = value; }
+        }
 
         public string DownloadStringSafe(string url)
         {

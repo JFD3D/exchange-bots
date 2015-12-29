@@ -48,9 +48,6 @@ namespace HuobiBot
         {
             var client = new WebClient2(_logger, DATA_TIMEOUT);
 
-            if (null != _webProxy)
-                client.Proxy = _webProxy;
-
             var ticker = client.DownloadObject<TickerResponse>(TICKER_URL);
             return null==ticker ? DateTime.MinValue : ticker.ServerTime;
         }
@@ -58,9 +55,6 @@ namespace HuobiBot
         internal MarketDepthResponse GetMarketDepth()
         {
             var client = new WebClient2(_logger, DATA_TIMEOUT);
-
-            if (null != _webProxy)
-                client.Proxy = _webProxy;
 
             var depth = client.DownloadObject<MarketDepthResponse>(MARKET_URL);
             return depth;
@@ -83,9 +77,6 @@ namespace HuobiBot
 
             var client = new WebClient2(_logger, DATA_TIMEOUT);
 
-            if (null != _webProxy)
-                client.Proxy = _webProxy;
-
             var depth = client.DownloadObject<MarketDepthResponse>(marketUrl);
             return depth;
         }
@@ -94,9 +85,6 @@ namespace HuobiBot
         {
             var client = new WebClient2(_logger, DATA_TIMEOUT);
 
-            if (null != _webProxy)
-                client.Proxy = _webProxy;
-
             var trades = client.DownloadObject<TradeStatisticsResponse>(TRADE_STATS_URL);
             return trades;
         }
@@ -104,9 +92,6 @@ namespace HuobiBot
         internal List<Candle> GetCandles()
         {
             var client = new WebClient2(_logger, DATA_TIMEOUT);
-
-            if (null != _webProxy)
-                client.Proxy = _webProxy;
 
             var data = client.DownloadStringSafe("http://market.huobi.com/staticmarket/btc_kline_001_json.js");
             if (null == data)
@@ -315,7 +300,9 @@ namespace HuobiBot
             byte[] bytes = Encoding.ASCII.GetBytes(postData);
 
             if (null != _webProxy)
+            {
                 webRequest.Proxy = _webProxy;
+            }
 
             webRequest.Method = "POST";
             webRequest.ContentType = "application/x-www-form-urlencoded";

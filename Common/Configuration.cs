@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Common
 {
-    public static class Configuration
+    public static class Configuration       //TODO: non-static, instantiate only in composition root and pass it through DI
     {
         private static Dictionary<string, string> _values;
 
@@ -15,13 +15,13 @@ namespace Common
 
 
         /// <summary>Read configuration file in form "key=value" per line, case insensitive. Lines not having this pattern are ignored.</summary>
-        public static void Load(string fullPath)
+        public static void Load(string fullPath)        //TODO: this is constructor
         {
             _values = new Dictionary<string, string>();
 
-            string line;
             using (var reader = new StreamReader(fullPath))
             {
+                string line;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (!String.IsNullOrEmpty(line) && line.Contains("="))
@@ -35,12 +35,16 @@ namespace Common
             }
         }
 
-
+        /// <summary>Get configuration value by key</summary>
+        /// <param name="key">Case insensitive key to get value for</param>
+        /// <returns>String value or NULL if configuration file didn't contain the given key</returns>
         public static string GetValue(string key)
         {
             key = key.ToUpper();
             if (!_values.ContainsKey(key))
+            {
                 return null;
+            }
             return _values[key];
         }
     }

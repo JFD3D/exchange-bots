@@ -11,7 +11,7 @@ namespace RippleBot
     internal class TradeHelper
     {
         /// <summary>Returns numeric indicator of market activity. Higher value means higher activity (i.e. lot of trades with higher volume).</summary>
-        /// <param name="last5mCandle">Recent trading statistics</param>
+        /// <param name="candles">Recent trading statistics</param>
         /// <returns>Coeficient in [0.0, 1.0] where 0.0 means totally peacefull market, 1.0 is wild.</returns>
         internal static float GetMadness(List<Candle> candles)
         {
@@ -61,6 +61,65 @@ namespace RippleBot
                 volumeCoef = 1.0f;
             else
                 volumeCoef = (float)((avgVolume - MIN_AVG_VOLUME) / (MAX_AVG_VOLUME - MIN_AVG_VOLUME));
+
+            //Average of volume and frequency coeficients
+            return (intenseCoef + volumeCoef) / 2;
+        }
+
+        internal static float GetMadness2(ExchangeHistoryResponse tradeHistory, int minAverageVolume, int maxAverageVolume)
+        {
+            //Bad response or no recent trading
+            if (null == tradeHistory || !tradeHistory.exchanges.Any())
+            {
+                return 0.0f;
+            }
+
+            var lastTrade = tradeHistory.exchanges[0];
+
+            //Last trade is too old
+            if (lastTrade.Time < DateTime.Now.Subtract(new TimeSpan(0, 5, 0)))
+            {
+                return 0.0f;
+            }
+
+            //Assuming the tradeHistory contains constant count of past trades (i.e. 10). The timeframe
+            //in which they were executed and their volume decides the madness coeficient.
+            float intenseCoef;
+
+            TimeSpan MIN_TIME_FRAME = new TimeSpan(0, 2, 0);
+            TimeSpan MAX_TIME_FRAME = new TimeSpan(0, 10, 0);
+
+            Exchange oldestTrade = tradeHistory.exchanges.Last();
+
+            if (oldestTrade.Time > DateTime.Now - MIN_TIME_FRAME)
+            {
+                intenseCoef = 1.0f;
+            }
+            else if (oldestTrade.Time < DateTime.Now - MAX_TIME_FRAME)
+            {
+                intenseCoef = 0.0f;
+            }
+            else
+            {
+                //Get average trade age in seconds
+                double totalTimeSpan = (lastTrade.Time - oldestTrade.Time).TotalSeconds;
+
+                double ageSum = 0.0;
+                var now = DateTime.Now;
+                foreach (Exchange trade in tradeHistory.exchanges)
+                {
+                    ageSum += (now - trade.Time).TotalSeconds;
+                }
+
+                double averageAge = ageSum / tradeHistory.exchanges.Count;
+
+                intenseCoef = (float)(1.0 - (averageAge / totalTimeSpan));
+            }
+
+
+            //TODO: float volumeCoef; count average volume
+
+
 
             //Average of volume and frequency coeficients
             return (intenseCoef + volumeCoef) / 2;

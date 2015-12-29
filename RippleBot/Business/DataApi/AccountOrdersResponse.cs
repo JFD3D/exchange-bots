@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 //TODO: when refactoring is finished, delete Offers.cs
-namespace RippleBot.Business
+namespace RippleBot.Business.DataApi
 {
     /// <summary>Response data deserialization for response from data API.</summary>
     /// <remarks>See <code>GET_orders.json</code> for sample response being deserialized with this class</remarks>

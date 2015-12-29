@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+
 using Common;
 using RippleBot.Business;
+using RippleBot.Business.DataApi;
 
 
 namespace RippleBot
@@ -82,7 +84,9 @@ namespace RippleBot
             var market = _requestor.GetMarketDepth();
 
             if (null == market)
+            {
                 return;
+            }
 
             var coef = TradeHelper.GetMadness(candles.results);
             _volumeWall = Helpers.SuggestWallVolume(coef, _minWallVolume, _maxWallVolume);

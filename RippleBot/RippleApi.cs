@@ -78,14 +78,6 @@ namespace RippleBot
             }
         }
 
-        internal ServerStateResponse GetServerState()
-        {
-            var command = new ServerStateRequest();
-
-            var data = sendToRippleNet(Helpers.SerializeJson(command));
-            return Helpers.DeserializeJSON<ServerStateResponse>(data);
-        }
-
         internal double GetBalance(string assetCode)
         {
             var url = String.Format("{0}/accounts/{1}/balances", DATA_API_URL, _walletAddress);
@@ -560,6 +552,30 @@ namespace RippleBot
             return Helpers.DeserializeJSON<CandlesResponse>(data);
         }
 
+        internal ExchangeHistoryResponse GetTradeStatistics2(string assetCode1, string assetGateway1, string assetCode2, string assetGateway2)
+        {
+            var webClient = new WebClient2(_logger, DATA_TIMEOUT);
+
+            string assetDef1 = assetCode1;
+            if (!String.IsNullOrEmpty(assetGateway1))
+            {
+                assetDef1 += "+" + assetGateway1;
+            }
+            string assetDef2 = assetCode2;
+            if (!String.IsNullOrEmpty(assetGateway2))
+            {
+                assetDef2 += "+" + assetGateway2;
+            }
+
+            const int limit = 10;
+
+            var url = String.Format("{0}/exchanges/{1}/{2}?descending=true&limit={3}&result=tesSUCCESS&type=OfferCreate",
+                                    DATA_API_URL, assetDef1, assetDef2, limit);
+
+            var data = webClient.DownloadObject<ExchangeHistoryResponse>(url);
+            return data;
+        }
+
         /// <summary>
         /// Cancel all orders that are not maintained by this bot and not placed manually
         /// </summary>
@@ -567,7 +583,9 @@ namespace RippleBot
         {
             var offerList = getActiveOrders();
             if (null == offerList || null == offerList.result)
+            {
                 return;
+            }
 
             foreach (var offer in offerList.result.offers)
             {

@@ -71,9 +71,9 @@ namespace RippleBot
                 return;
             }
 
-            var baseBalance = _baseRequestor.GetBalance(_baseCurrency, _baseGateway);
-            var arbBalance = _arbRequestor.GetBalance(_arbCurrency, _arbGateway);
-            var xrpBalance = _baseRequestor.GetBalance(Const.NATIVE_ASSET);
+            double baseBalance = _baseRequestor.GetBalance(_baseCurrency, _baseGateway);
+            double arbBalance = _arbRequestor.GetBalance(_arbCurrency, _arbGateway);
+            double xrpBalance = _baseRequestor.GetBalance(Const.NATIVE_ASSET);
             log("Balances: {0:0.000} {1}; {2:0.000} {3}; {4:0.000} XRP", baseBalance, _baseCurrency, arbBalance, _arbCurrency, xrpBalance);
 
             var lowestBaseAsk = TradeHelper.GetFirstLiquidOrder(baseMarket.Asks, MIN_TRADE_VOLUME);
@@ -82,7 +82,7 @@ namespace RippleBot
 
             var lowestArbAsk = TradeHelper.GetFirstLiquidOrder(arbMarket.Asks, MIN_TRADE_VOLUME);
             var highestBaseBid = TradeHelper.GetFirstLiquidOrder(baseMarket.Bids, MIN_TRADE_VOLUME);
-            var arbRatio = lowestArbAsk.Price / highestBaseBid.Price;
+            double arbRatio = lowestArbAsk.Price / highestBaseBid.Price;
 
             log("BASIC ratio={0:0.00000}; ARB ratio={1:0.00000}", baseRatio, arbRatio);
 
@@ -107,17 +107,17 @@ namespace RippleBot
                     double arbVolume = highestArbBid.Amount;
 
                     //Try to buy XRP for BASIC
-                    var amount = Math.Min(baseVolume, arbVolume);
+                    double amount = Math.Min(baseVolume, arbVolume);
                     int orderId = _baseRequestor.PlaceBuyOrder(lowestBaseAsk.Price + 0.00001, amount);
                     log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestBaseAsk.Price, _baseCurrency, orderId);
                     Order orderInfo = _baseRequestor.GetOrderInfo2(orderId);
 
-                    if (null != orderInfo &&orderInfo.Closed)
+                    if (null != orderInfo && orderInfo.Closed)
                     {
-                        var newXrpBalance = _baseRequestor.GetBalance(Const.NATIVE_ASSET);
-                        amount = newXrpBalance - xrpBalance;
+//DEL                        var newXrpBalance = _baseRequestor.GetBalance(Const.NATIVE_ASSET);
+//DEL                        amount = newXrpBalance - xrpBalance;
                         log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
-                        amount -= 0.048;    //So we don't fall into "lack of funds" due to fees
+//DEL                        amount -= 0.048;    //So we don't fall into "lack of funds" due to fees
                         //Try to sell XRP for ARB
                         int arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);     //price*0.9 basically does market order
                         log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestArbBid.Price, _arbCurrency, arbBuyOrderId);
@@ -165,15 +165,15 @@ namespace RippleBot
                     double baseVolume = highestBaseBid.Amount;
 
                     //Try to buy XRP for ARB
-                    var amount = Math.Min(baseVolume, arbVolume);
+                    double amount = Math.Min(baseVolume, arbVolume);
                     int orderId = _arbRequestor.PlaceBuyOrder(lowestArbAsk.Price + 0.00001, amount);
                     log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestArbAsk.Price, _arbCurrency, orderId);
                     Order orderInfo = _arbRequestor.GetOrderInfo2(orderId);
 
                     if (null != orderInfo && orderInfo.Closed)
                     {
-                        var newXrpBalance = _arbRequestor.GetBalance(Const.NATIVE_ASSET);
-                        amount = newXrpBalance - xrpBalance;
+//DEL                        var newXrpBalance = _arbRequestor.GetBalance(Const.NATIVE_ASSET);
+//DEL                        amount = newXrpBalance - xrpBalance;
                         log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                         //Try to sell XRP for BASIC
                         var baseBuyOrderId = _baseRequestor.PlaceSellOrder(highestBaseBid.Price * 0.9, ref amount);      //price*0.9 basically does market order

@@ -562,36 +562,44 @@ namespace RippleBot
         /// <summary>
         /// Cancel all orders that are not maintained by this bot and not placed manually
         /// </summary>
-        internal void CleanupZombies(int buyOrderId, int sellOrderId)       //TODO: there's too much dependency on XRP. Rewrite it so it's more general
+        internal void CleanupZombies(int buyOrderId, int sellOrderId)
         {
-            var offerList = getActiveOrders();
-            if (null == offerList || null == offerList.result)
+            AccountOrdersResponse offerList = getActiveOrders2();
+            if (null == offerList)
             {
                 return;
             }
 
-            foreach (var offer in offerList.result.offers)
+            foreach (Order order in offerList.orders)
             {
-                if (offer.Price.ToString().Contains(MANUAL_ORDER_SIGN) ||
-                    offer.Amount.ToString().Contains(MANUAL_ORDER_SIGN) || offer.AmountXrp.ToString().Contains(MANUAL_ORDER_SIGN))  //TODO: No! Investigate how a fiatX/fiatY order looks like
+                double aPrice = order.BuyPrice(order.BaseAsset, order.BaseGateway);
+                if (aPrice.ToString().Contains(MANUAL_ORDER_SIGN) ||
+                    (1.0 / aPrice).ToString().Contains(MANUAL_ORDER_SIGN) ||
+                    order.Amount(order.BaseAsset, order.BaseGateway).ToString().Contains(MANUAL_ORDER_SIGN) ||
+                    order.Amount(order.CounterAsset, order.CounterGateway).ToString().Contains(MANUAL_ORDER_SIGN))
                 {
                     //TODO: This is really stupid!! Find some way how to safely flag manual/bot orders
-                    _logger.AppendMessage("Cleanup: Order ID=" + offer.seq + " not a zombie, possibly manual", true, ConsoleColor.Cyan);
+                    _logger.AppendMessage("Cleanup: Order ID=" + order.OrderId + " not a zombie, possibly manual", true, ConsoleColor.Cyan);
                 }
-                else if ((-1 != buyOrderId && buyOrderId == offer.seq) || (-1 != sellOrderId && sellOrderId == offer.seq))
+                else if ((-1 != buyOrderId && buyOrderId == order.OrderId) || (-1 != sellOrderId && sellOrderId == order.OrderId))
                 {
                     //Our own buy/sell order
                     continue;
                 }
                 else
                 {
-                    _logger.AppendMessage(String.Format("Identified zombie order with ID={0} ({1} assets for {2} {3}). Trying to cancel...",
-                                                        offer.seq, offer.AmountXrp, offer.Price, offer.Currency), true, ConsoleColor.Yellow);
+                    _logger.AppendMessage(String.Format("Identified zombie order with ID={0} ({1} {2} {3} for {4} {5}). Trying to cancel...",
+                                                        order.OrderId, order.specification.direction, order.Amount(order.BaseAsset, order.BaseGateway), order.BaseAsset,
+                                                        order.BuyPrice(order.BaseAsset, order.BaseGateway), order.CounterAsset), true, ConsoleColor.Yellow);
                     //Found offer abandoned by this bot, try to cancel it
-                    if (CancelOrder(offer.seq))
+                    if (CancelOrder(order.OrderId))
+                    {
                         _logger.AppendMessage("... success", true, ConsoleColor.Cyan);
+                    }
                     else
+                    {
                         _logger.AppendMessage("... failed. Maybe next time", true, ConsoleColor.Yellow);
+                    }
                 }
             }
         }

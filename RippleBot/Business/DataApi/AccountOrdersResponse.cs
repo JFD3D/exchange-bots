@@ -41,13 +41,47 @@ namespace RippleBot.Business.DataApi
             Closed = closed;
         }
 
+        /// <summary>Base asset code</summary>
+        internal string BaseAsset
+        {
+            get { return specification.quantity.currency; }
+        }
+
+        /// <summary>Counter asset code</summary>
+        internal string CounterAsset
+        {
+            get { return specification.totalPrice.currency; }
+        }
+
+        /// <summary>Base asset gateway address</summary>
+        internal string BaseGateway
+        {
+            get
+            {
+                return String.IsNullOrWhiteSpace(specification.quantity.counterparty)
+                    ? null
+                    : specification.quantity.counterparty;
+            }
+        }
+
+        /// <summary>Counter asset gateway address</summary>
+        internal string CounterGateway
+        {
+            get
+            {
+                return String.IsNullOrWhiteSpace(specification.quantity.counterparty)
+                    ? null
+                    : specification.totalPrice.counterparty;
+            }
+        }
+
         /// <summary>Get buy price of one of the assets of this order</summary>
         /// <param name="assetToBuy">Code for one of the assets on this offer</param>
         /// <param name="assetGateway">
         /// Optional gateway address of the asset being bought. Makes sense only if an asset is traded for the same
         /// asset between two gateways.
         /// </param>
-        internal double BuyPrice(string assetToBuy, string assetGateway = null)             //TODO: might as well be futile! Traders should save the price and it doesn't change after an order is created
+        internal double BuyPrice(string assetToBuy, string assetGateway = null)
         {
             gatewayCheck(assetGateway);
 

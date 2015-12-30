@@ -1,6 +1,7 @@
 ﻿using System;
+
 using Common;
-using RippleBot.Business;
+using RippleBot.Business.DataApi;
 
 
 namespace RippleBot
@@ -17,7 +18,7 @@ namespace RippleBot
         private string _baseGateway;
         private string _arbGateway;
         private double _parity;
-        private double _arbFactor = 1.007;        //The price of arbitrage currency must be at least 0.7% higher than parity to buy
+        private double _arbFactor = 1.007;              //The price of arbitrage currency must be at least 0.7% higher than parity to buy (if not configured)
         private const double MIN_TRADE_VOLUME = 1.0;    //Minimum trade volume in XRP so we don't lose on fees
 
         private const int ZOMBIE_CHECK = 12;            //Check for dangling orders to cancel every 12th round
@@ -26,7 +27,7 @@ namespace RippleBot
         //I need to watch XRP balance to revert filled abandoned fiat->XRP orders
         private double _lastValidXrpBalance = -1.0;
 
-        private RippleApi _baseRequestor;      //TODO: No! Use only one requestor with 2 gateways
+        private RippleApi _baseRequestor;      //TODO: No! Use only one requestor, gateway is input param
         private RippleApi _arbRequestor;
 
 
@@ -70,8 +71,8 @@ namespace RippleBot
                 return;
             }
 
-            var baseBalance = _baseRequestor.GetBalance(_baseCurrency);
-            var arbBalance = _arbRequestor.GetBalance(_arbCurrency);
+            var baseBalance = _baseRequestor.GetBalance(_baseCurrency, _baseGateway);
+            var arbBalance = _arbRequestor.GetBalance(_arbCurrency, _arbGateway);
             var xrpBalance = _baseRequestor.GetBalance(Const.NATIVE_ASSET);
             log("Balances: {0:0.000} {1}; {2:0.000} {3}; {4:0.000} XRP", baseBalance, _baseCurrency, arbBalance, _arbCurrency, xrpBalance);
 
@@ -109,7 +110,7 @@ namespace RippleBot
                     var amount = Math.Min(baseVolume, arbVolume);
                     int orderId = _baseRequestor.PlaceBuyOrder(lowestBaseAsk.Price + 0.00001, amount);
                     log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestBaseAsk.Price, _baseCurrency, orderId);
-                    var orderInfo = _baseRequestor.GetOrderInfo(orderId);
+                    Order orderInfo = _baseRequestor.GetOrderInfo2(orderId);
 
                     if (null != orderInfo &&orderInfo.Closed)
                     {
@@ -118,9 +119,9 @@ namespace RippleBot
                         log("Buy XRP orderID={0} filled OK, bought {1} XRP", ConsoleColor.Green, orderId, amount);
                         amount -= 0.048;    //So we don't fall into "lack of funds" due to fees
                         //Try to sell XRP for ARB
-                        var arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);     //price*0.9 basically does market order
+                        int arbBuyOrderId = _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);     //price*0.9 basically does market order
                         log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestArbBid.Price, _arbCurrency, arbBuyOrderId);
-                        var arbBuyOrderInfo = _arbRequestor.GetOrderInfo(arbBuyOrderId);
+                        Order arbBuyOrderInfo = _arbRequestor.GetOrderInfo2(arbBuyOrderId);
                         if (null != arbBuyOrderInfo && arbBuyOrderInfo.Closed)
                         {
                             log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _arbCurrency, arbBuyOrderId);
@@ -129,14 +130,14 @@ namespace RippleBot
                         else if (null != arbBuyOrderInfo)
                         {
                             log("OrderID={0} (sell {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
-                                arbBuyOrderId, arbBuyOrderInfo.AmountXrp, arbBuyOrderInfo.Price, _arbCurrency);
+                                arbBuyOrderId, arbBuyOrderInfo.Amount(Const.NATIVE_ASSET), arbBuyOrderInfo.BuyPrice(_arbCurrency, _arbGateway), _arbCurrency);
                             //NOTE: If it's closed later, the arbitrage is just successfully finished silently
                         }
                     }
-                    else
+                    else if (null != orderInfo)
                     {
                         log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
-                            orderId, orderInfo.AmountXrp, orderInfo.Price, _baseCurrency);
+                            orderId, orderInfo.Amount(Const.NATIVE_ASSET), orderInfo.BuyPrice(Const.NATIVE_ASSET), _baseCurrency);
                         if (_baseRequestor.CancelOrder(orderId))
                         {
                             log("...success?", ConsoleColor.Cyan);
@@ -167,7 +168,7 @@ namespace RippleBot
                     var amount = Math.Min(baseVolume, arbVolume);
                     int orderId = _arbRequestor.PlaceBuyOrder(lowestArbAsk.Price + 0.00001, amount);
                     log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestArbAsk.Price, _arbCurrency, orderId);
-                    Offer orderInfo = _arbRequestor.GetOrderInfo(orderId);
+                    Order orderInfo = _arbRequestor.GetOrderInfo2(orderId);
 
                     if (null != orderInfo && orderInfo.Closed)
                     {
@@ -177,7 +178,7 @@ namespace RippleBot
                         //Try to sell XRP for BASIC
                         var baseBuyOrderId = _baseRequestor.PlaceSellOrder(highestBaseBid.Price * 0.9, ref amount);      //price*0.9 basically does market order
                         log("Tried to sell {0} XRP for {1} {2} each. OrderID={3}", amount, highestBaseBid.Price, _baseCurrency, baseBuyOrderId);
-                        var baseBuyOrderInfo = _baseRequestor.GetOrderInfo(baseBuyOrderId);
+                        Order baseBuyOrderInfo = _baseRequestor.GetOrderInfo2(baseBuyOrderId);
                         if (null != baseBuyOrderInfo && baseBuyOrderInfo.Closed)
                         {
                             log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _baseCurrency, baseBuyOrderId);
@@ -186,14 +187,14 @@ namespace RippleBot
                         else if (null != baseBuyOrderInfo)
                         {
                             log("OrderID={0} (sell {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
-                                baseBuyOrderId, baseBuyOrderInfo.AmountXrp, baseBuyOrderInfo.Price, _baseCurrency);
+                                baseBuyOrderId, baseBuyOrderInfo.Amount(Const.NATIVE_ASSET), baseBuyOrderInfo.BuyPrice(_baseCurrency, _baseGateway), _baseCurrency);
                             //NOTE: If it's closed later, the arbitrage is just successfully finished silently
                         }
                     }
-                    else
+                    else if (null != orderInfo)
                     {
                         log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
-                            orderId, orderInfo.AmountXrp, orderInfo.Price, _arbCurrency);
+                            orderId, orderInfo.Amount(Const.NATIVE_ASSET), orderInfo.BuyPrice(Const.NATIVE_ASSET), _arbCurrency);
                         if (_arbRequestor.CancelOrder(orderId))
                         {
                             log("...success?", ConsoleColor.Cyan);

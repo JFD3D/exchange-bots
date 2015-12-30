@@ -64,7 +64,7 @@ namespace RippleBot
 
         protected override void Check()
         {
-            ExchangeHistoryResponse tradeHistory = _requestor.GetTradeStatistics2(Const.NATIVE_ASSET, null, _currencyCode, _gateway);
+            ExchangeHistoryResponse tradeHistory = _requestor.GetTradeStatistics(Const.NATIVE_ASSET, null, _currencyCode, _gateway);
             var market = _requestor.GetMarketDepth();
 
             if (null == market)

@@ -56,7 +56,6 @@
     <Compile Include="Business\CancelOrderRequest.cs" />
     <Compile Include="Business\CreateOrderRequest.cs" />
     <Compile Include="Business\AccountLines.cs" />
-    <Compile Include="Business\DataApi\Candles.cs" />
     <Compile Include="Business\DataApi\ExchangeHistoryResponse.cs" />
     <Compile Include="Business\Market.cs" />
     <Compile Include="Business\MarketDepthAsks.cs" />

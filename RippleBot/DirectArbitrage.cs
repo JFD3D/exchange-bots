@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Common;
 using RippleBot.Business;
 
@@ -267,7 +268,7 @@ namespace RippleBot
 
                     if (!_arbOrderPrice.eq(newPrice))
                     {
-                        createArbOrder(baseBalance, newPrice);
+                        createArbOrder(arbBalance, newPrice);
                         log("Updated ARB order ID={0}; amount={1} {2}.{3}; price={2} {3}",
                             _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName, _arbOrderPrice, _currency);
                     }

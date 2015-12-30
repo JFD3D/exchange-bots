@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -18,7 +17,6 @@ namespace RippleBot
     internal class RippleApi //futile : IDisposable
     {
         private const int SOCKET_TIMEOUT = 12000;
-//TODO:delete        private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";
         private const string DATA_API_URL = "https://data.ripple.com/v2";           //TODO: config value
         private const int DATA_TIMEOUT = 40 * 1000;     //40sec timeout for data API
         private const byte RETRY_COUNT = 10;
@@ -536,29 +534,8 @@ namespace RippleBot
             return true;
         }
 
-/*TODO:delete
-        /// <summary>Get trade statistics</summary>
-        /// <param name="age">First candle will start on now-age</param>
-        internal CandlesResponse GetTradeStatistics(TimeSpan age)
-        {
-            var input = new CandlesRequest
-            {
-                @base = new Base {currency = "XRP"},
-                counter = new Counter { currency = _fiatCurreny, issuer = _issuerAddress },
-                startTime = DateTime.UtcNow.Subtract(age).ToString("s"),    //"2014-07-22T10:00:00"
-                endTime = DateTime.UtcNow.ToString("s"),
-                timeIncrement = "minute",
-                timeMultiple = 5,
-                format = "json"
-            };
-            var jsonParams = Helpers.SerializeJson(input);
-
-            var data = sendPostRequest("offers_exercised", jsonParams);
-            return Helpers.DeserializeJSON<CandlesResponse>(data);
-        }
-*/
         /// <summary>Get recent trades of asset pair</summary>
-        internal ExchangeHistoryResponse GetTradeStatistics2(string baseAssetCode, string gaseAssetGateway, string counterAsset, string counterAssetGateway)
+        internal ExchangeHistoryResponse GetTradeStatistics(string baseAssetCode, string gaseAssetGateway, string counterAsset, string counterAssetGateway)
         {
             var webClient = new WebClient2(_logger, DATA_TIMEOUT);
 

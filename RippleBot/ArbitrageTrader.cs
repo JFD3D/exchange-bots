@@ -1,5 +1,6 @@
 ﻿using System;
 using Common;
+using RippleBot.Business;
 
 
 namespace RippleBot
@@ -58,12 +59,16 @@ namespace RippleBot
             var baseMarket = _baseRequestor.GetMarketDepth();
 
             if (null == baseMarket || null == baseMarket.Asks || null == baseMarket.Bids)
+            {
                 return;
+            }
 
             var arbMarket = _arbRequestor.GetMarketDepth();
 
             if (null == arbMarket || null == arbMarket.Asks || null == arbMarket.Bids)
+            {
                 return;
+            }
 
             var baseBalance = _baseRequestor.GetBalance(_baseCurrency);
             var arbBalance = _arbRequestor.GetBalance(_arbCurrency);
@@ -81,7 +86,9 @@ namespace RippleBot
             log("BASIC ratio={0:0.00000}; ARB ratio={1:0.00000}", baseRatio, arbRatio);
 
             if (double.IsNaN(baseRatio) || double.IsNaN(arbRatio))
+            {
                 return;     //Happens sometimes after bad JSON parsing
+            }
 
             //Trade from basic to arbitrage currency
             if (baseBalance >= 0.1)
@@ -119,7 +126,7 @@ namespace RippleBot
                             log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _arbCurrency, arbBuyOrderId);
                             log("{0} -> {1} ARBITRAGE SUCCEEDED!", ConsoleColor.Green, _baseCurrency, _arbCurrency);
                         }
-                        else
+                        else if (null != arbBuyOrderInfo)
                         {
                             log("OrderID={0} (sell {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
                                 arbBuyOrderId, arbBuyOrderInfo.AmountXrp, arbBuyOrderInfo.Price, _arbCurrency);
@@ -131,8 +138,13 @@ namespace RippleBot
                         log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
                             orderId, orderInfo.AmountXrp, orderInfo.Price, _baseCurrency);
                         if (_baseRequestor.CancelOrder(orderId))
+                        {
                             log("...success?", ConsoleColor.Cyan);
-                        else log("...failed", ConsoleColor.Cyan);
+                        }
+                        else
+                        {
+                            log("...failed", ConsoleColor.Cyan);
+                        }
                     }
                 }
             }
@@ -155,7 +167,7 @@ namespace RippleBot
                     var amount = Math.Min(baseVolume, arbVolume);
                     int orderId = _arbRequestor.PlaceBuyOrder(lowestArbAsk.Price + 0.00001, amount);
                     log("Tried to buy {0} XRP for {1} {2} each. OrderID={3}", amount, lowestArbAsk.Price, _arbCurrency, orderId);
-                    var orderInfo = _arbRequestor.GetOrderInfo(orderId);
+                    Offer orderInfo = _arbRequestor.GetOrderInfo(orderId);
 
                     if (null != orderInfo && orderInfo.Closed)
                     {
@@ -171,7 +183,7 @@ namespace RippleBot
                             log("Buy {0} orderID={1} filled OK", ConsoleColor.Green, _baseCurrency, baseBuyOrderId);
                             log("{0} -> {1} ARBITRAGE SUCCEEDED!", ConsoleColor.Green, _arbCurrency, _baseCurrency);
                         }
-                        else
+                        else if (null != baseBuyOrderInfo)
                         {
                             log("OrderID={0} (sell {1:0.000} XRP for {2} {3} each) remains dangling. Forgetting it...", ConsoleColor.Yellow,
                                 baseBuyOrderId, baseBuyOrderInfo.AmountXrp, baseBuyOrderInfo.Price, _baseCurrency);
@@ -183,8 +195,13 @@ namespace RippleBot
                         log("OrderID={0} (buy {1:0.000} XRP for {2} {3} each) remains dangling. Trying to cancel...", ConsoleColor.Yellow,
                             orderId, orderInfo.AmountXrp, orderInfo.Price, _arbCurrency);
                         if (_arbRequestor.CancelOrder(orderId))
+                        {
                             log("...success?", ConsoleColor.Cyan);
-                        else log("...failed", ConsoleColor.Cyan);
+                        }
+                        else
+                        {
+                            log("...failed", ConsoleColor.Cyan);
+                        }
                     }
                 }
             }
@@ -206,12 +223,12 @@ namespace RippleBot
                 if (baseRatio > _parity * _arbFactor)
                 {
                     log("Converting to {0}", _arbCurrency);
-                    var orderId = _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);
+                    _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);
                 }
                 else if (arbRatio < _parity)
                 {
                     log("Converting to {0}", _baseCurrency);
-                    var orderId = _baseRequestor.PlaceSellOrder(highestBaseBid.Price * 0.9, ref amount);
+                    _baseRequestor.PlaceSellOrder(highestBaseBid.Price * 0.9, ref amount);
                 }
                 else
                 {
@@ -221,12 +238,12 @@ namespace RippleBot
                     if (baseDiffFromSell < arbDiffFromBuyback)
                     {
                         log("Better converting to {0}", _arbCurrency);
-                        var orderId = _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);
+                        _arbRequestor.PlaceSellOrder(highestArbBid.Price * 0.9, ref amount);
                     }
                     else
                     {
                         log("Better converting to {0}", _baseCurrency);
-                        var orderId = _baseRequestor.PlaceSellOrder(highestBaseBid.Price * 0.9, ref amount);
+                        _baseRequestor.PlaceSellOrder(highestBaseBid.Price * 0.9, ref amount);
                     }
                 }
             }

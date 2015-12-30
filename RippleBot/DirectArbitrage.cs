@@ -76,8 +76,8 @@ namespace RippleBot
 
         protected override void Check()
         {
-            double baseBalance = _baseRequestor.GetBalance(_currency);
-            double arbBalance = _arbRequestor.GetBalance(_currency);
+            double baseBalance = _baseRequestor.GetBalance(_currency, _baseGateway);
+            double arbBalance = _arbRequestor.GetBalance(_currency, _arbGateway);
 
             log("### Balances: {0:0.0000} {1}.{2};  {3:0.0000} {1}.{4}", baseBalance, _currency, _baseGatewayName, arbBalance, _arbGatewayName);
 

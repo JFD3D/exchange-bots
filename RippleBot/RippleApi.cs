@@ -15,7 +15,7 @@ using RippleBot.Business.DataApi;
 
 namespace RippleBot
 {
-    internal class RippleApi : IDisposable
+    internal class RippleApi //futile : IDisposable
     {
         private const int SOCKET_TIMEOUT = 12000;
 //TODO:delete        private const string CHARTS_BASE_URL = "http://api.ripplecharts.com/api/";
@@ -78,7 +78,7 @@ namespace RippleBot
             }
         }
 
-        internal double GetBalance(string assetCode)
+        internal double GetBalance(string assetCode, string assetGateway=null)
         {
             var url = String.Format("{0}/accounts/{1}/balances", DATA_API_URL, _walletAddress);
 
@@ -91,14 +91,16 @@ namespace RippleBot
                 return -1.0;
             }
 
-            return balanceData.Asset(assetCode);
+            return balanceData.Asset(assetCode, assetGateway);
         }
 
-        internal Offer GetOrderInfo(int orderId)
+        internal Offer GetOrderInfo(int orderId)        //TODO: delete
         {
             var offerList = getActiveOrders();
             if (null == offerList)
+            {
                 return null;
+            }
             var order = offerList.result.offers.FirstOrDefault(o => o.seq == orderId);
 
             //NULL means it was already filled BUG: OR CANCELLED!!! TODO: some better way of getting order status
@@ -534,20 +536,6 @@ namespace RippleBot
             return true;
         }
 
-        internal void Close()
-        {
-            _closedByUser = true;
-            if (_open)
-                _webSocket.Close();
-            _open = false;            
-        }
-
-        public void Dispose()
-        {
-            Close();
-        }
-
-
 /*TODO:delete
         /// <summary>Get trade statistics</summary>
         /// <param name="age">First candle will start on now-age</param>
@@ -631,6 +619,21 @@ namespace RippleBot
             }
         }
 
+        /// <summary>Close the underlying socket</summary>
+        internal void Close()
+        {
+            _closedByUser = true;
+            if (_open)
+            {
+                _webSocket.Close();
+            }
+            _open = false;
+        }
+
+        ~RippleApi()
+        {
+            Close();
+        }
 
         #region private helpers
 
@@ -742,11 +745,10 @@ namespace RippleBot
         private void websocket_Closed(object sender, EventArgs e)
         {
             _open = false;
-            _logger.AppendMessage("WebSocket connection was closed.", true, ConsoleColor.Yellow);
 
             if (!_closedByUser)
             {
-                _logger.AppendMessage("Trying to reopen...", true, ConsoleColor.Yellow);
+                _logger.AppendMessage("WebSocket connection was closed. Trying to reopen...", true, ConsoleColor.Yellow);
                 Init();
             }
         }

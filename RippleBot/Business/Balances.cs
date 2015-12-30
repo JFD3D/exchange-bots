@@ -22,9 +22,10 @@ namespace RippleBot.Business
 
         /// <summary>Get asset balance by its code</summary>
         /// <param name="assetCode">XRP, USD, CNY...</param>
-        internal double Asset(string assetCode)
+        internal double Asset(string assetCode, string assetGateway)
         {
-            return balances.First(bal => assetCode == bal.currency).Available;
+            return balances.First(bal => assetCode == bal.currency &&
+                                  (String.IsNullOrEmpty(assetGateway) || assetGateway == bal.counterparty)).Available;
         }
     }
 

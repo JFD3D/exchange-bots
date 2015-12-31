@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Common;
 
@@ -70,6 +71,28 @@ namespace RippleBot.Business
 
                 return _amount;
             }
+        }
+
+        internal double GetAmount(string assetCode, string assetGateway = null)     //TODO: just "Amount"
+        {
+            if (assetCode == taker_gets.currency && assetCode == taker_pays.currency && String.IsNullOrEmpty(assetGateway))
+            {
+                throw new ArgumentNullException("Ambiguous asset identification. Gateway address must be given for same-asset offers", "assetGateway");
+            }
+
+            if (assetCode == taker_gets.currency &&
+                (String.IsNullOrEmpty(assetGateway) || assetGateway == taker_gets.issuer))
+            {
+                return Double.Parse(taker_gets.value);
+            }
+
+            if (assetCode == taker_pays.currency &&
+                (String.IsNullOrEmpty(assetGateway) || assetGateway == taker_pays.issuer))
+            {
+                return Double.Parse(taker_pays.value);
+            }
+
+            throw new Exception(String.Format("No such asset in this order: {0}.{1}", assetCode, assetGateway));
         }
 
         /// <summary>Price of one XRP in USD</summary>

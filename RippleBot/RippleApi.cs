@@ -76,7 +76,14 @@ namespace RippleBot
             }
         }
 
-        internal double GetBalance(string assetCode, string assetGateway=null)
+        /// <summary>Get underlying account's balance of given asset.</summary>
+        /// <param name="assetCode">Asset code (USD, JPY, XRP...)</param>
+        /// <param name="assetGateway">
+        /// Gateway that issues the asset or <code>null</code> for native asset (XRP). If the account has
+        /// just one trust line with that asset code, this parameter can also be null.
+        /// </param>
+        /// <remarks>Uses data API (REST-like)</remarks>
+        internal double GetBalance2(string assetCode, string assetGateway=null)
         {
             var url = String.Format("{0}/accounts/{1}/balances", DATA_API_URL, _walletAddress);
 
@@ -90,6 +97,54 @@ namespace RippleBot
             }
 
             return balanceData.Asset(assetCode, assetGateway);
+        }
+
+        /// <summary>Get native asset balance for given account.</summary>
+        /// <remarks>
+        /// Uses websockets as we need most recent value (data API shows last closed ledger)
+        /// </remarks>
+        internal double GetXrpBalance()
+        {
+            var command = new AccountInfoRequest { account = _walletAddress };
+
+            var data = sendToRippleNet(Helpers.SerializeJson(command));
+
+            if (null == data)
+                return -1.0;
+
+            if (!checkError("GetXrpBalance", data))
+                return -1.0;
+
+            var account = Helpers.DeserializeJSON<AccountInfoResponse>(data);
+            if (null == account.result || null == account.result.account_data)
+                return -1.0;
+
+            return account.result.account_data.BalanceXrp;
+        }
+
+        internal double GetBalance(string currencyCode, string issuerAddress=null)      //TODO: in case of problems with GetBalance2, delete that and use this
+        {
+            var command = new AccountLinesRequest { account = _walletAddress };
+
+            var data = sendToRippleNet(Helpers.SerializeJson(command));
+
+            if (null == data)
+                return -1.0;
+
+            if (!checkError("GetBalance(" + currencyCode + ")", data))
+                return -1.0;
+
+            var account = Helpers.DeserializeJSON<AccountLinesResponse>(data);
+            if (null == account.result.lines)
+                return -1.0;
+
+            var theLine = account.result.lines.SingleOrDefault(line =>
+                                                               (String.IsNullOrEmpty(issuerAddress) || line.account == issuerAddress) &&
+                                                               line.currency == currencyCode);
+            if (null == theLine)
+                return -1.0;
+
+            return theLine.Balance;
         }
 
         internal Offer GetOrderInfo(int orderId)        //TODO: delete
@@ -633,11 +688,13 @@ namespace RippleBot
             if (!checkError("GetOrderInfo", data))
                 return null;
 
+            //Because 'taker_gets' and 'taker_pays' can be of 2 types, do a tricky conversion (decimal to object) to ease further processing
             var dataFix = _offerPattern.Replace(data, "'taker_${verb}s': {'currency': 'XRP', 'issuer':'ripple labs', 'value': '${value}'}".Replace("'", "\""));
 
             return Helpers.DeserializeJSON<OffersResponse>(dataFix);
         }
 
+        //TODO: we'll probably need to drop this one because data API seems to give old data (probably last closed ledger)
         private AccountOrdersResponse getActiveOrders2()
         {
             var webClient = new WebClient2(_logger, DATA_TIMEOUT);

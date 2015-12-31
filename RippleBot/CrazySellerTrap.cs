@@ -157,7 +157,7 @@ namespace RippleBot
                 else
                 {
                     //Check if cancelled by Ripple due to "lack of funds"
-                    var balance = _requestor.GetBalance(Const.NATIVE_ASSET);
+                    var balance = _requestor.GetXrpBalance();
                     if (balance.eq(_xrpBalance, 0.1))
                     {
                         log("BUY order ID={0} closed but asset validation failed (balance={1} XRP). Asuming was cancelled, trying to recreate",
@@ -257,7 +257,7 @@ namespace RippleBot
                     else        //Closed or cancelled
                     {
                         //Check if cancelled by the network
-                        var balance = _requestor.GetBalance(Const.NATIVE_ASSET);
+                        var balance = _requestor.GetXrpBalance();
                         if (balance.eq(_xrpBalance, 0.1))
                         {
                             log("SELL order ID={0} closed but asset validation failed (balance={1} XRP). Asuming was cancelled, trying to recreate",
@@ -301,7 +301,7 @@ namespace RippleBot
                 _requestor.CleanupZombies(_buyOrderId, _sellOrderId);
             }
 
-            _xrpBalance = _requestor.GetBalance(Const.NATIVE_ASSET);
+            _xrpBalance = _requestor.GetXrpBalance();
             log("### Balance= {0} XRP", _xrpBalance);
             log(new string('=', 84));
         }

@@ -77,8 +77,8 @@ namespace RippleBot
 
         protected override void Check()
         {
-            double baseBalance = _baseRequestor.GetBalance(_currency, _baseGateway);
-            double arbBalance = _arbRequestor.GetBalance(_currency, _arbGateway);
+            double baseBalance = _baseRequestor.GetBalance2(_currency, _baseGateway);
+            double arbBalance = _arbRequestor.GetBalance2(_currency, _arbGateway);
 
             log("### Balances: {0:0.0000} {1}.{2};  {3:0.0000} {1}.{4}", baseBalance, _currency, _baseGatewayName, arbBalance, _arbGatewayName);
 
@@ -144,7 +144,7 @@ namespace RippleBot
                     }
                     else
                     {
-                        log("BASE order ID={0} amount decreased but ARB balance validation failed (was{1:0.0000}, is {2:0.0000}). Nothing to do here",
+                        log("BASE order ID={0} amount decreased but ARB balance validation failed (was {1:0.0000}, is {2:0.0000}). Nothing to do here",
                             ConsoleColor.Yellow, _baseOrderId, _lastArbBalance, arbBalance);
                     }
                 }
@@ -243,7 +243,7 @@ namespace RippleBot
                     }
                     else
                     {
-                        log("ARB order ID={0} amount decreased but BASE balance validation failed (was{1:0.0000}, is {2:0.0000}). Nothing to do here",
+                        log("ARB order ID={0} amount decreased but BASE balance validation failed (was {1:0.0000}, is {2:0.0000}). Nothing to do here",
                             ConsoleColor.Yellow, _baseOrderId, _lastBaseBalance, baseBalance);
                     }
                 }

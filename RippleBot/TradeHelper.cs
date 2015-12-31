@@ -62,10 +62,9 @@ namespace RippleBot
                 double totalTimeSpan = (lastTrade.Time - oldestTrade.Time).TotalSeconds;
 
                 double ageSum = 0.0;
-                var now = DateTime.Now;
                 foreach (Exchange trade in tradeHistory.exchanges)
                 {
-                    ageSum += (now - trade.Time).TotalSeconds;
+                    ageSum += (lastTrade.Time - trade.Time).TotalSeconds;
                 }
 
                 double averageAge = ageSum / tradeHistory.exchanges.Count;

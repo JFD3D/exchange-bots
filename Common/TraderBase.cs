@@ -43,7 +43,7 @@ namespace Common
             } while (!_killSignal);
         }
 
-        public void Kill()
+        public virtual void Kill()
         {
             _killSignal = true;
             log("Trader received kill signal. Good bye.");

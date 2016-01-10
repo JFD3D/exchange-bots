@@ -243,6 +243,12 @@ namespace RippleBot
             log(new string('=', 74));
         }
 
+        public override void Kill()
+        {
+            base.Kill();
+            _requestor.Close();
+        }
+
         private double getLowestAsk(Market market)
         {
             var lowestAsk = market.Asks.First().Price;

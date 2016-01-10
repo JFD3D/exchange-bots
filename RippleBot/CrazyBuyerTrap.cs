@@ -271,6 +271,12 @@ namespace RippleBot
             log(new string('=', 74));
         }
 
+        public override void Kill()
+        {
+            base.Kill();
+            _requestor.Close();
+        }
+
 
         private double suggestSellPrice(Market market)
         {

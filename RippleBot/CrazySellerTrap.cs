@@ -306,6 +306,13 @@ namespace RippleBot
             log(new string('=', 84));
         }
 
+        public override void Kill()
+        {
+            base.Kill();
+            _requestor.Close();
+        }
+
+
         private double suggestBuyPrice(Market market)
         {
             const int decPlaces = 14;

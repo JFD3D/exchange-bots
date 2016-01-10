@@ -296,6 +296,13 @@ namespace RippleBot
             log(new string('=', 74));
         }
 
+        public override void Kill()
+        {
+            base.Kill();
+            _baseRequestor.Close();
+            _arbRequestor.Close();
+        }
+
 
         private double suggestPrice(List<FiatAsk> asks, double minPrice, int currentOrderId, double currentOrderPrice)
         {

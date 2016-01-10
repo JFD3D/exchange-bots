@@ -260,5 +260,12 @@ namespace RippleBot
 
             log(new string('=', 70));
         }
+
+        public override void Kill()
+        {
+            base.Kill();
+            _baseRequestor.Close();
+            _arbRequestor.Close();
+        }
     }
 }

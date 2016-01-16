@@ -110,14 +110,20 @@ namespace RippleBot
             var data = sendToRippleNet(Helpers.SerializeJson(command));
 
             if (null == data)
+            {
                 return -1.0;
+            }
 
             if (!checkError("GetXrpBalance", data))
+            {
                 return -1.0;
+            }
 
             var account = Helpers.DeserializeJSON<AccountInfoResponse>(data);
             if (null == account.result || null == account.result.account_data)
+            {
                 return -1.0;
+            }
 
             return account.result.account_data.BalanceXrp;
         }
@@ -129,20 +135,28 @@ namespace RippleBot
             var data = sendToRippleNet(Helpers.SerializeJson(command));
 
             if (null == data)
+            {
                 return -1.0;
+            }
 
             if (!checkError("GetBalance(" + currencyCode + ")", data))
+            {
                 return -1.0;
+            }
 
             var account = Helpers.DeserializeJSON<AccountLinesResponse>(data);
             if (null == account.result.lines)
+            {
                 return -1.0;
+            }
 
             var theLine = account.result.lines.SingleOrDefault(line =>
                                                                (String.IsNullOrEmpty(issuerAddress) || line.account == issuerAddress) &&
                                                                line.currency == currencyCode);
             if (null == theLine)
+            {
                 return -1.0;
+            }
 
             return theLine.Balance;
         }
@@ -194,7 +208,7 @@ namespace RippleBot
                 taker_gets = new Take { currency = _fiatCurreny, issuer = _issuerAddress }
             };
 
-            var bidData = sendToRippleNet(Helpers.SerializeJson(command));
+            string bidData = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == bidData)
             {
                 return null;
@@ -220,7 +234,7 @@ namespace RippleBot
                 taker_gets = new Take { currency = "XRP" }
             };
 
-            var askData = sendToRippleNet(Helpers.SerializeJson(command));
+            string askData = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == askData)
             {
                 return null;
@@ -252,7 +266,7 @@ namespace RippleBot
         /// </summary>
         /// <param name="counterAssetCode">Code of counter asset (must not be XRP)</param>
         /// <param name="counterAssetGateway">Gateway address of counter asset</param>
-        internal List<FiatAsk> GetOrderBookAsks(string counterAssetCode, string counterAssetGateway)
+        internal List<FiatAsk> GetOrderBookAsks(string counterAssetCode, string counterAssetGateway, bool includeAutoBridged = false)
         {
             var command = new MarketDepthRequest
             {
@@ -261,9 +275,11 @@ namespace RippleBot
                 taker_gets = new Take { currency = _fiatCurreny, issuer = _issuerAddress }
             };
 
-            var askData = sendToRippleNet(Helpers.SerializeJson(command));
+            string askData = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == askData)
+            {
                 return null;
+            }
 
             if (!checkError(String.Format("GetOrderBookAsks({0}, {1})", counterAssetCode, counterAssetGateway), askData))
             {
@@ -277,12 +293,92 @@ namespace RippleBot
                 return null;
             }
 
+            if (!includeAutoBridged)
+            {
+                return asks.result.offers;
+            }
+
+            //Check auto-bridged orders by taking asset1/XRP and XRP/asset2 and counting asset1/asset2
+            command = new MarketDepthRequest
+            {
+                id = 4,
+                taker_pays = new Take { currency = counterAssetCode, issuer = counterAssetGateway },
+                taker_gets = new Take { currency = Const.NATIVE_ASSET }
+            };
+
+            string natAskData = sendToRippleNet(Helpers.SerializeJson(command));
+            if (null == natAskData)
+            {
+                return asks.result.offers;
+            }
+
+            if (!checkError(String.Format("#2 GetOrderBookAsks: orders for {0}.{1}", counterAssetCode, counterAssetGateway), natAskData))
+            {
+                return asks.result.offers;
+            }
+
+            var natAsks = Helpers.DeserializeJSON<MarketDepthAsksResponse>(natAskData);
+            if (null == natAsks.result)
+            {
+                _logger.AppendMessage("natAskData JSON is " + Environment.NewLine + natAskData, true, ConsoleColor.Magenta);
+                return asks.result.offers;
+            }
+
+            command = new MarketDepthRequest
+            {
+                id = 5,
+                taker_pays = new Take { currency = Const.NATIVE_ASSET },
+                taker_gets = new Take { currency = _fiatCurreny, issuer = _issuerAddress }
+            };
+
+            string natBidData = sendToRippleNet(Helpers.SerializeJson(command));
+            if (null == natBidData)
+            {
+                return asks.result.offers;
+            }
+
+            if (!checkError(String.Format("#3 GetOrderBookAsks: orders for {0}.{1}", _fiatCurreny, _issuerAddress), natBidData))
+            {
+                return asks.result.offers;
+            }
+
+            var natBids = Helpers.DeserializeJSON<MarketDepthBidsResponse>(natBidData);
+            if (null == natBids.result)
+            {
+                _logger.AppendMessage("natBidData JSON is " + Environment.NewLine + natBidData, true, ConsoleColor.Magenta);
+                return asks.result.offers;
+            }
+
+            //NOTE: takes only "best" auto-bridged order and only over XRP. Considering other options would make this code
+            //      too complicated and the benefits are questionable
+            Ask bestAsk = natAsks.result.offers[0];
+            Bid bestBid = natBids.result.offers[0];
+
+            double abPrice = bestAsk.Price / bestBid.Price;
+
+            //Inject the auto-bridged order to the resulting list
+            for (int i = 0; i < asks.result.offers.Count; i++)
+            {
+                if (abPrice < asks.result.offers[i].Price)
+                {
+                    var abOrder = new FiatAsk
+                    {
+                        Account = "AUTOBRIDGED",
+                        TakerPays = new Take { value = abPrice.ToString() },
+                        TakerGets = new Take { value = (1.0).ToString() }      //NOTE: ugly workaround for the .Price getter
+                        //Don't need anything else for trading purposes
+                    };
+                    asks.result.offers.Insert(i, abOrder);
+                    break;
+                }
+            }
+
             return asks.result.offers;
         }
 
         internal int PlaceBuyOrder(double price, double amount)
         {
-            long amountXrpDrops = (long) Math.Round(amount * Const.DROPS_IN_XRP);
+            long amountXrpDrops = (long) Math.Round(amount * Const.DROPS_IN_NATIVE);
             double amountFiat = price * amount;
 
             var command = new CreateBuyOrderRequest
@@ -375,7 +471,7 @@ namespace RippleBot
 
         private int placeSellOrder(double amountFiat, ref double amountXrp)
         {
-            long amountXrpDrops = (long)Math.Round(amountXrp * Const.DROPS_IN_XRP);
+            long amountXrpDrops = (long)Math.Round(amountXrp * Const.DROPS_IN_NATIVE);
 
             var command = new CreateSellOrderRequest
             {

@@ -8,8 +8,10 @@ namespace RippleBot
         /// <summary>Code of native asset, i.e. ripple</summary>
         internal const string NATIVE_ASSET = "XRP";
 
-        /// <summary>Number of 'drops' (smallest value that can be in a transaction) in one <see cref="NATIVE_ASSET"/>.</summary>
-        internal const double DROPS_IN_XRP = 1000000.0;
+        /// <summary>
+        /// Number of 'drops' (smallest value that can be in a transaction) in one <see cref="NATIVE_ASSET"/>
+        /// </summary>
+        internal const double DROPS_IN_NATIVE = 1000000.0;
 
         /// <summary>
         /// Maximum amount of XRP in drops that this bot is willing to pay to the server for any operation

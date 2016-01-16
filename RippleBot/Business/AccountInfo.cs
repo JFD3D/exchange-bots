@@ -47,7 +47,7 @@ namespace RippleBot.Business
             get
             {
                 ulong drops = ulong.Parse(Balance);
-                return (double)drops / Const.DROPS_IN_XRP;
+                return (double)drops / Const.DROPS_IN_NATIVE;
             }
         }
     }   

@@ -49,19 +49,23 @@ namespace RippleBot.Business
             get
             {
                 if (null == TakerPays)
+                {
                     return 0.0;
+                }
 
-                return double.Parse(TakerPays) / Const.DROPS_IN_XRP;
+                return double.Parse(TakerPays) / Const.DROPS_IN_NATIVE;
             }
         }
 
-        /// <summary>Price of one XRP in USD</summary>
+        /// <summary>Price of one XRP in fiat</summary>
         public double Price
         {
             get
             {
                 if (null == TakerGets || String.IsNullOrEmpty(TakerGets.value))
-                    return 0.0;         //TODO: INVESTIGATE IMPACT!
+                {
+                    return 0.0;
+                }
 
                 var dollars = double.Parse(TakerGets.value);
                 return dollars / Amount;

@@ -93,7 +93,9 @@ namespace RippleBot
                 var baseOrder = _baseRequestor.GetOrderInfo(_baseOrderId);
 
                 if (null == baseOrder)
+                {
                     return;
+                }
 
                 //Filled or cancelled
                 if (baseOrder.Closed)
@@ -164,7 +166,7 @@ namespace RippleBot
                 {
                     log("BASE order ID={0} untouched (amount={1:0.0000} {2}.{3})", _baseOrderId, baseOrder.Amount, _currency, _baseGatewayName);
 
-                    List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_currency, _arbGateway);
+                    List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_currency, _arbGateway, true);
                     double newPrice = suggestPrice(asks, _baseMinPrice, _baseOrderId, _baseOrderPrice);
 
                     if (!_baseOrderPrice.eq(newPrice))
@@ -192,7 +194,9 @@ namespace RippleBot
                 var arbOrder = _arbRequestor.GetOrderInfo(_arbOrderId);
 
                 if (null == arbOrder)
+                {
                     return;
+                }
 
                 //Filled or cancelled
                 if (arbOrder.Closed)
@@ -263,7 +267,7 @@ namespace RippleBot
                 {
                     log("ARB order ID={0} untouched (amount={1:0.0000} {2}.{3})", _arbOrderId, arbOrder.Amount, _currency, _arbGatewayName);
 
-                    List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_currency, _baseGateway);
+                    List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_currency, _baseGateway, true);
                     double newPrice = suggestPrice(asks, _arbMinPrice, _arbOrderId, _arbOrderPrice);
 
                     if (!_arbOrderPrice.eq(newPrice))
@@ -358,7 +362,7 @@ namespace RippleBot
 
             if (price.eq(-1.0))
             {
-                List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_currency, _arbGateway);
+                List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_currency, _arbGateway, true);
                 price = suggestPrice(asks, _baseMinPrice, _baseOrderId, _baseOrderPrice);
             }
 
@@ -386,7 +390,7 @@ namespace RippleBot
 
             if (price.eq(-1.0))
             {
-                List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_currency, _baseGateway);
+                List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_currency, _baseGateway, true);
                 price = suggestPrice(asks, _arbMinPrice, _arbOrderId, _arbOrderPrice);
             }
 

@@ -11,9 +11,13 @@ namespace Common
         public static int SuggestInterval(float madnessCoef, int minInterval = 2000, int maxInterval = 11000)
         {
             if (madnessCoef <= 0.0f)
+            {
                 return maxInterval;
+            }
             if (madnessCoef >= 1.0f)
+            {
                 return minInterval;
+            }
 
             return (int)(minInterval + ((1.0f - madnessCoef) * (maxInterval - minInterval)));
         }
@@ -21,9 +25,13 @@ namespace Common
         public static double SuggestWallVolume(float madnessCoef, double minVolume, double maxVolue)
         {
             if (madnessCoef <= 0.0f)
+            {
                 return minVolume;
+            }
             if (madnessCoef >= 1.0f)
+            {
                 return maxVolue;
+            }
 
             return (minVolume + (madnessCoef * (maxVolue - minVolume)));
         }
@@ -40,7 +48,9 @@ namespace Common
                 catch (Exception e)
                 {
                     if (burkeErrors)
-                        return new T();     //TODO: when really lot of time, try to heal the broken JSON by closing the open elements and deserialize at least that
+                    {
+                        return new T();
+                    }
 
                     throw new Exception("JSON deserialization problem. The input string was:" + Environment.NewLine + json, e);
                 }

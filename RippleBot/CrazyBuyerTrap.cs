@@ -82,7 +82,9 @@ namespace RippleBot
             var market = _requestor.GetMarketDepth();
 
             if (null == market)
+            {
                 return;
+            }
 
             float coef = TradeHelper.GetMadness(tradeHistory, Const.NATIVE_ASSET, 500.0, 3000.0);
             _volumeWall = Helpers.SuggestWallVolume(coef, _minWallVolume, _maxWallVolume);
@@ -95,7 +97,9 @@ namespace RippleBot
                 var sellOrder = _requestor.GetOrderInfo(_sellOrderId);
 
                 if (null == sellOrder)
+                {
                     return;
+                }
 
                 if (!sellOrder.Closed)
                 {
@@ -190,7 +194,9 @@ namespace RippleBot
                     var buyOrder = _requestor.GetOrderInfo(_buyOrderId);
 
                     if (null == buyOrder)
+                    {
                         return;
+                    }
 
                     if (!buyOrder.Closed)
                     {
@@ -305,13 +311,18 @@ namespace RippleBot
 
                 //Don't consider volume of own order
                 if (Configuration.AccessKey == ask.Account && ask.Sequence == _sellOrderId)
+                {
                     sum -= _sellOrderAmount;
+                }
             }
 
             //Market too dry, use SELL order before last, so we see it in chart
             var price = market.Asks.Last().Price - increment;
             if (-1 != _sellOrderId && Math.Abs(price - _sellOrderPrice) < _minPriceUpdate)
+            {
                 return _sellOrderPrice;
+            }
+
             return Math.Round(price, DEC_PLACES);
         }
 
@@ -326,11 +337,15 @@ namespace RippleBot
             {
                 //Don't count self
                 if (Configuration.AccessKey == bid.Account && bid.Sequence == _buyOrderId)
+                {
                     continue;
+                }
                 //Skip BUY orders with tiny amount
                 sumVolume += bid.Amount;
                 if (sumVolume < MIN_WALL_VOLUME)
+                {
                     continue;
+                }
 
                 if (bid.Price < _executedSellPrice - _minDifference)
                 {

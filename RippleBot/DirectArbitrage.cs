@@ -9,18 +9,21 @@ using RippleBot.Business;
 namespace RippleBot
 {
     /// <summary>
-    /// Direct arbitrage with one fiat currency on two different gateway. No XRP mid-step.
-    /// Uses simple constant price both for buy and sell.
+    /// Direct arbitrage with fiat assets on two different gateway. No XRP mid-step.
+    /// Uses constant minimum price both for buy and sell.
     /// </summary>
     public class DirectArbitrage : TraderBase
     {
-        private string _currency;
+        private string _baseAssetCode;
+        private string _arbAssetCode;
         private string _baseGateway;
         private string _arbGateway;
         private string _baseGatewayName;
         private string _arbGatewayName;
         private double _baseMinPrice;
         private double _arbMinPrice;
+        private double _baseMaxPrice = Double.MaxValue;
+        private double _arbMaxPrice = Double.MaxValue;
 
         private double _lastBaseBalance = -1.0;
         private double _lastArbBalance = -1.0;
@@ -28,6 +31,7 @@ namespace RippleBot
         private RippleApi _baseRequestor;
         private RippleApi _arbRequestor;
 
+        //Threshold to ignore small balance updates. Common for both assets (TODO: consider two threshold)
         private double _threshold;
 
         //Check for dangling orders to cancel every 10th round
@@ -51,7 +55,8 @@ namespace RippleBot
 
         protected override void Initialize()
         {
-            _currency = Configuration.GetValue("currency_code");
+            _baseAssetCode = Configuration.GetValue("base_asset_code");
+            _arbAssetCode = Configuration.GetValue("arbitrage_asset_code");
 
             _baseGateway = Configuration.GetValue("base_gateway_address");
             _baseGatewayName = Configuration.GetValue("base_gateway_name");
@@ -61,26 +66,33 @@ namespace RippleBot
 
             _baseMinPrice = double.Parse(Configuration.GetValue("min_base_price"));
             _arbMinPrice = double.Parse(Configuration.GetValue("min_arb_price"));
+            _baseMaxPrice = Configuration.GetValue("max_base_price") != null
+                                ? double.Parse(Configuration.GetValue("max_base_price"))
+                                : Double.MaxValue;
+            _arbMaxPrice = Configuration.GetValue("max_arb_price") != null
+                            ? double.Parse(Configuration.GetValue("max_arb_price"))
+                            : Double.MaxValue;
             _threshold = double.Parse(Configuration.GetValue("amount_threshold"));
             _intervalMs = 15000;
 
             var cleanup = Configuration.GetValue("cleanup_zombies");
             _cleanup = bool.Parse(cleanup ?? false.ToString());
 
-            _baseRequestor = new RippleApi(_logger, _baseGateway, _currency);
+            _baseRequestor = new RippleApi(_logger, _baseGateway, _baseAssetCode);
             _baseRequestor.Init();
-            _arbRequestor = new RippleApi(_logger, _arbGateway, _currency);
+            _arbRequestor = new RippleApi(_logger, _arbGateway, _arbAssetCode);
             _arbRequestor.Init();
-            log("Direct arbitrage trader started for currency {0}; gateways {1}/{2}; base_min={3:0.0000}; arb_min={4:0.0000}",
-                _currency, _baseGatewayName, _arbGatewayName, _arbMinPrice, _baseMinPrice);
+            log("Direct arbitrage trader started for pair {0}.{1} / {2}.{3}; base_min={4:0.0000}; arb_min={5:0.0000}",
+                _baseAssetCode, _baseGatewayName, _arbAssetCode, _arbGatewayName, _arbMinPrice, _baseMinPrice);
         }
 
         protected override void Check()
         {
-            double baseBalance = _baseRequestor.GetBalance2(_currency, _baseGateway);
-            double arbBalance = _arbRequestor.GetBalance2(_currency, _arbGateway);
+            double baseBalance = _baseRequestor.GetBalance2(_baseAssetCode, _baseGateway);
+            double arbBalance = _arbRequestor.GetBalance2(_arbAssetCode, _arbGateway);
 
-            log("### Balances: {0:0.0000} {1}.{2};  {3:0.0000} {1}.{4}", baseBalance, _currency, _baseGatewayName, arbBalance, _arbGatewayName);
+            log("### Balances: {0:0.0000} {1}.{2};  {3:0.0000} {4}.{5}",
+                baseBalance, _baseAssetCode, _baseGatewayName, arbBalance, _arbAssetCode, _arbGatewayName);
 
             if (baseBalance.eq(-1.0, 0.01) || arbBalance.eq(-1.0, 0.01))
             {
@@ -102,20 +114,20 @@ namespace RippleBot
                 {
                     if (baseBalance.eq(_baseOrderAmount, 0.1) && _baseOrderAmount > _threshold)
                     {
-                        log("BASE order ID={0} closed but asset validation failed (balance={1} {2}). Assuming was cancelled, trying to recreate",
-                            ConsoleColor.Yellow, _baseOrderId, baseBalance, _currency);
+                        log("BASE order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
+                            ConsoleColor.Yellow, _baseOrderId, baseBalance, _baseAssetCode);
                         createBaseOrder(baseBalance);
 
                         if (-1 != _baseOrderId)
                         {
-                            log("Created BASE order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {2}.{5}",
-                                ConsoleColor.Cyan, _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName, _baseOrderPrice, _arbGatewayName);
+                            log("Created BASE order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {5}.{6}", ConsoleColor.Cyan,
+                                _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName, _baseOrderPrice, _arbAssetCode, _arbGatewayName);
                         }
                     }
                     else
                     {
                         log("BASE order ID={0} (amount={1:0.0000} {2}) was closed at price={3}",
-                            ConsoleColor.Green, _baseOrderId, _baseOrderAmount, _currency, _baseOrderPrice);
+                            ConsoleColor.Green, _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseOrderPrice);
                         _baseOrderId = -1;
                         _baseOrderPrice = 0.0;
                         _baseOrderAmount = 0.0;
@@ -124,7 +136,7 @@ namespace RippleBot
                         createArbOrder(arbBalance);
                         if (-1 != _arbOrderId)
                         {
-                            log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName);
+                            log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName);
                         }
                     }
                 }
@@ -135,13 +147,13 @@ namespace RippleBot
                     {
                         _baseOrderAmount = baseOrder.Amount;
                         log("BASE order ID={0} partially filled. Remaining amount={1:0.0000} {2}.{3}",
-                            ConsoleColor.Green, _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName);
+                            ConsoleColor.Green, _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName);
 
                         //Increase ARB order
                         createArbOrder(arbBalance);
                         if (-1 != _arbOrderId)
                         {
-                            log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName);
+                            log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName);
                         }
                     }
                     else
@@ -153,27 +165,26 @@ namespace RippleBot
                 else if (baseOrder.Amount + _threshold < baseBalance)
                 {
                     //BASE balance increased => ARB order was (partially) filled
-                    log("ARB order bought some {0}.{1} (BASE balance={2:0.0000})", ConsoleColor.Cyan, _currency, _baseGatewayName, baseBalance);
+                    log("ARB order bought some {0}.{1} (BASE balance={2:0.0000})", ConsoleColor.Cyan, _baseAssetCode, _baseGatewayName, baseBalance);
 
                     //Increase BASE order
                     createBaseOrder(baseBalance);
                     if (-1 != _baseOrderId)
                     {
-                        log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName);
+                        log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName);
                     }
                 }
                 else
                 {
-                    log("BASE order ID={0} untouched (amount={1:0.0000} {2}.{3})", _baseOrderId, baseOrder.Amount, _currency, _baseGatewayName);
+                    log("BASE order ID={0} untouched (amount={1:0.0000} {2}.{3})", _baseOrderId, baseOrder.Amount, _baseAssetCode, _baseGatewayName);
 
-                    List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_currency, _arbGateway, true);
-                    double newPrice = suggestPrice(asks, _baseMinPrice, _baseOrderId, _baseOrderPrice);
+                    List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_arbAssetCode, _arbGateway, true);
+                    double newPrice = suggestPrice(asks, _baseMinPrice, _baseMaxPrice, _baseOrderId, _baseOrderPrice);
 
                     if (!_baseOrderPrice.eq(newPrice))
                     {
                         createBaseOrder(baseBalance, newPrice);
-                        log("Updated BASE order ID={0}; amount={1} {2}.{3}; price={2} {3}",
-                            _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName, _baseOrderPrice, _currency);
+                        log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName);
                     }
                 }
             }
@@ -183,8 +194,8 @@ namespace RippleBot
                 createBaseOrder(baseBalance);
                 if (-1 != _baseOrderId)
                 {
-                    log("Successfully created BASE order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {2}.{5}",
-                        ConsoleColor.Cyan, _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName, _baseOrderPrice, _arbGatewayName);
+                    log("Successfully created BASE order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {5}.{6}", ConsoleColor.Cyan,
+                        _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName, _baseOrderPrice, _arbAssetCode, _arbGatewayName);
                 }
             }
 
@@ -204,19 +215,19 @@ namespace RippleBot
                     if (arbBalance.eq(_arbOrderAmount, 0.1) && _arbOrderAmount > _threshold)
                     {
                         log("ARB order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
-                            ConsoleColor.Yellow, _arbOrderId, arbBalance, _currency);
+                            ConsoleColor.Yellow, _arbOrderId, arbBalance, _arbAssetCode);
                         createArbOrder(arbBalance);
 
                         if (-1 != _arbOrderId)
                         {
-                            log("Created ARB order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {2}.{5}",
-                                ConsoleColor.Cyan, _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName, _arbOrderPrice, _baseGatewayName);
+                            log("Created ARB order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {5}.{6}", ConsoleColor.Cyan,
+                                _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName, _arbOrderPrice, _baseAssetCode, _baseGatewayName);
                         }
                     }
                     else
                     {
                         log("ARB order ID={0} (amount={1:0.0000} {2}) was closed at price={3}",
-                            ConsoleColor.Green, _arbOrderId, _arbOrderAmount, _currency, _arbOrderPrice);
+                            ConsoleColor.Green, _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbOrderPrice);
                         _arbOrderId = -1;
                         _arbOrderPrice = 0.0;
                         _arbOrderAmount = 0.0;
@@ -225,7 +236,7 @@ namespace RippleBot
                         createBaseOrder(baseBalance);
                         if (-1 != _baseOrderId)
                         {
-                            log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName);
+                            log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName);
                         }
                     }
                 }
@@ -236,13 +247,13 @@ namespace RippleBot
                     {
                         _arbOrderAmount = arbOrder.Amount;
                         log("ARB order ID={0} partially filled. Remaining amount={1:0.0000} {2}.{3}",
-                            ConsoleColor.Green, _arbOrderId, _arbOrderAmount, _currency, _baseGatewayName);
+                            ConsoleColor.Green, _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName);
 
                         //Increase BASE order
                         createBaseOrder(baseBalance);
                         if (-1 != _baseOrderId)
                         {
-                            log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _currency, _baseGatewayName);
+                            log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName);
                         }
                     }
                     else
@@ -254,27 +265,26 @@ namespace RippleBot
                 else if (arbOrder.Amount + _threshold < arbBalance)
                 {
                     //ARB balance increased => BASE order was (partially) filled
-                    log("BASE order bought some {0}.{1} (ARB balance={2:0.0000})", ConsoleColor.Cyan, _currency, _arbGatewayName, arbBalance);
+                    log("BASE order bought some {0}.{1} (ARB balance={2:0.0000})", ConsoleColor.Cyan, _arbAssetCode, _arbGatewayName, arbBalance);
 
                     //Increase ARB order
                     createArbOrder(arbBalance);
                     if (-1 != _arbOrderId)
                     {
-                        log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName);
+                        log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName);
                     }
                 }
                 else
                 {
-                    log("ARB order ID={0} untouched (amount={1:0.0000} {2}.{3})", _arbOrderId, arbOrder.Amount, _currency, _arbGatewayName);
+                    log("ARB order ID={0} untouched (amount={1:0.0000} {2}.{3})", _arbOrderId, arbOrder.Amount, _arbAssetCode, _arbGatewayName);
 
-                    List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_currency, _baseGateway, true);
-                    double newPrice = suggestPrice(asks, _arbMinPrice, _arbOrderId, _arbOrderPrice);
+                    List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_baseAssetCode, _baseGateway, true);
+                    double newPrice = suggestPrice(asks, _arbMinPrice, _arbMaxPrice, _arbOrderId, _arbOrderPrice);
 
                     if (!_arbOrderPrice.eq(newPrice))
                     {
                         createArbOrder(arbBalance, newPrice);
-                        log("Updated ARB order ID={0}; amount={1} {2}.{3}; price={2} {3}",
-                            _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName, _arbOrderPrice, _currency);
+                        log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName);
                     }
                 }
             }
@@ -284,8 +294,8 @@ namespace RippleBot
                 createArbOrder(arbBalance);
                 if (-1 != _arbOrderId)
                 {
-                    log("Successfully created ARB order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {2}.{5}",
-                        ConsoleColor.Cyan, _arbOrderId, _arbOrderAmount, _currency, _arbGatewayName, _arbOrderPrice, _baseGatewayName);
+                    log("Successfully created ARB order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {5}.{6}", ConsoleColor.Cyan,
+                        _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName, _arbOrderPrice, _baseAssetCode, _baseGatewayName);
                 }
             }
 
@@ -308,7 +318,7 @@ namespace RippleBot
         }
 
 
-        private double suggestPrice(List<FiatAsk> asks, double minPrice, int currentOrderId, double currentOrderPrice)
+        private double suggestPrice(List<FiatAsk> asks, double minPrice, double maxPrice, int currentOrderId, double currentOrderPrice)
         {
             const int DEC_PLACES = 14;
             const double INCREMENT = 0.0001;            //In same-fiat arbitrage we can afford this
@@ -334,6 +344,10 @@ namespace RippleBot
                         return currentOrderPrice;
                     }
 
+                    if (sellPrice > maxPrice)
+                    {
+                        return maxPrice;
+                    }
                     return sellPrice;
                 }                
             }
@@ -362,11 +376,11 @@ namespace RippleBot
 
             if (price.eq(-1.0))
             {
-                List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_currency, _arbGateway, true);
-                price = suggestPrice(asks, _baseMinPrice, _baseOrderId, _baseOrderPrice);
+                List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_arbAssetCode, _arbGateway, true);
+                price = suggestPrice(asks, _baseMinPrice, _baseMaxPrice, _baseOrderId, _baseOrderPrice);
             }
 
-            int newOrderId = _baseRequestor.PlaceOrder(baseBalance, price, _currency, _arbGateway);
+            int newOrderId = _baseRequestor.PlaceOrder(baseBalance, price, _arbAssetCode, _arbGateway);
             if (-1 != newOrderId)
             {
                 _baseOrderId = newOrderId;
@@ -390,11 +404,11 @@ namespace RippleBot
 
             if (price.eq(-1.0))
             {
-                List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_currency, _baseGateway, true);
-                price = suggestPrice(asks, _arbMinPrice, _arbOrderId, _arbOrderPrice);
+                List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_baseAssetCode, _baseGateway, true);
+                price = suggestPrice(asks, _arbMinPrice, _arbMaxPrice, _arbOrderId, _arbOrderPrice);
             }
 
-            int newOrderId = _arbRequestor.PlaceOrder(arbBalance, price, _currency, _baseGateway);
+            int newOrderId = _arbRequestor.PlaceOrder(arbBalance, price, _baseAssetCode, _baseGateway);
             if (-1 != newOrderId)
             {
                 _arbOrderId = newOrderId;

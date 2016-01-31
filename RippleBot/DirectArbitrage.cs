@@ -112,7 +112,7 @@ namespace RippleBot
                 //Filled or cancelled
                 if (baseOrder.Closed)
                 {
-                    if (baseBalance.eq(_baseOrderAmount, 0.1) && _baseOrderAmount > _threshold)
+                    if (baseBalance > 0.0 && baseBalance.eq(_baseOrderAmount, 0.1) && _baseOrderAmount > _threshold)
                     {
                         log("BASE order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _baseOrderId, baseBalance, _baseAssetCode);
@@ -212,7 +212,7 @@ namespace RippleBot
                 //Filled or cancelled
                 if (arbOrder.Closed)
                 {
-                    if (arbBalance.eq(_arbOrderAmount, 0.1) && _arbOrderAmount > _threshold)
+                    if (arbBalance > 0.0 && arbBalance.eq(_arbOrderAmount, 0.1) && _arbOrderAmount > _threshold)
                     {
                         log("ARB order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _arbOrderId, arbBalance, _arbAssetCode);

@@ -320,6 +320,11 @@ namespace RippleBot
 
         private double suggestPrice(List<FiatAsk> asks, double minPrice, double maxPrice, int currentOrderId, double currentOrderPrice)
         {
+            if (null == asks || !asks.Any())
+            {
+                return currentOrderPrice > 0.0 ? currentOrderPrice : minPrice;
+            }
+
             const int DEC_PLACES = 14;
             const double INCREMENT = 0.0001;            //In same-fiat arbitrage we can afford this
             const double MIN_PRICE_UPDATE = 0.00005;    //and this

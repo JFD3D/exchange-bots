@@ -31,8 +31,11 @@ namespace RippleBot
         private RippleApi _baseRequestor;
         private RippleApi _arbRequestor;
 
-        //Threshold to ignore small balance updates. Common for both assets (TODO: consider two threshold)
-        private double _threshold;
+        //Thresholds to ignore small balance updates
+        private double base_threshold;
+        private double arb_threshold;
+        private double _baseMinPriceUpdate = 0.00005;
+        private double _arbMinPriceUpdate = 0.00005;
 
         //Check for dangling orders to cancel every 10th round
         private const int ZOMBIE_CHECK = 10;
@@ -72,7 +75,18 @@ namespace RippleBot
             _arbMaxPrice = Configuration.GetValue("max_arb_price") != null
                             ? double.Parse(Configuration.GetValue("max_arb_price"))
                             : Double.MaxValue;
-            _threshold = double.Parse(Configuration.GetValue("amount_threshold"));
+            base_threshold = double.Parse(Configuration.GetValue("base_amount_threshold"));
+            arb_threshold = double.Parse(Configuration.GetValue("arb_amount_threshold"));
+
+            if (null != Configuration.GetValue("base_min_price_update"))
+            {
+                _baseMinPriceUpdate = double.Parse(Configuration.GetValue("base_min_price_update"));
+            }
+            if (null != Configuration.GetValue("arb_min_price_update"))
+            {
+                _arbMinPriceUpdate = double.Parse(Configuration.GetValue("arb_min_price_update"));
+            }
+
             _intervalMs = 15000;
 
             var cleanup = Configuration.GetValue("cleanup_zombies");
@@ -112,7 +126,7 @@ namespace RippleBot
                 //Filled or cancelled
                 if (baseOrder.Closed)
                 {
-                    if (baseBalance > 0.0 && baseBalance.eq(_baseOrderAmount, 0.1) && _baseOrderAmount > _threshold)
+                    if (baseBalance > 0.0 && baseBalance.eq(_baseOrderAmount, 0.1) && _baseOrderAmount > base_threshold)
                     {
                         log("BASE order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _baseOrderId, baseBalance, _baseAssetCode);
@@ -140,10 +154,10 @@ namespace RippleBot
                         }
                     }
                 }
-                else if (baseOrder.Amount + _threshold < _baseOrderAmount)
+                else if (baseOrder.Amount + base_threshold < _baseOrderAmount)
                 {
                     //Double-check with ARB balance that BASE order was indeed partially filled
-                    if (arbBalance - _threshold > _lastArbBalance)
+                    if (arbBalance - arb_threshold > _lastArbBalance)
                     {
                         _baseOrderAmount = baseOrder.Amount;
                         log("BASE order ID={0} partially filled. Remaining amount={1:0.0000} {2}.{3}",
@@ -162,7 +176,7 @@ namespace RippleBot
                             ConsoleColor.Yellow, _baseOrderId, _lastArbBalance, arbBalance);
                     }
                 }
-                else if (baseOrder.Amount + _threshold < baseBalance)
+                else if (baseOrder.Amount + base_threshold < baseBalance)
                 {
                     //BASE balance increased => ARB order was (partially) filled
                     log("ARB order bought some {0}.{1} (BASE balance={2:0.0000})", ConsoleColor.Cyan, _baseAssetCode, _baseGatewayName, baseBalance);
@@ -179,7 +193,7 @@ namespace RippleBot
                     log("BASE order ID={0} untouched (amount={1:0.0000} {2}.{3})", _baseOrderId, baseOrder.Amount, _baseAssetCode, _baseGatewayName);
 
                     List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_arbAssetCode, _arbGateway, true);
-                    double newPrice = suggestPrice(asks, _baseMinPrice, _baseMaxPrice, _baseOrderId, _baseOrderPrice);
+                    double newPrice = suggestPrice(asks, _baseMinPrice, _baseMaxPrice, _baseOrderId, _baseOrderPrice, _baseMinPriceUpdate);
 
                     if (!_baseOrderPrice.eq(newPrice))
                     {
@@ -188,7 +202,7 @@ namespace RippleBot
                     }
                 }
             }
-            else if (baseBalance > _threshold)
+            else if (baseBalance > base_threshold)
             {
                 //We have some spare BASE assets to sell
                 createBaseOrder(baseBalance);
@@ -212,7 +226,7 @@ namespace RippleBot
                 //Filled or cancelled
                 if (arbOrder.Closed)
                 {
-                    if (arbBalance > 0.0 && arbBalance.eq(_arbOrderAmount, 0.1) && _arbOrderAmount > _threshold)
+                    if (arbBalance > 0.0 && arbBalance.eq(_arbOrderAmount, 0.1) && _arbOrderAmount > arb_threshold)
                     {
                         log("ARB order ID={0} closed but asset validation failed (balance={1:0.0000} {2}). Assuming was cancelled, trying to recreate",
                             ConsoleColor.Yellow, _arbOrderId, arbBalance, _arbAssetCode);
@@ -240,10 +254,10 @@ namespace RippleBot
                         }
                     }
                 }
-                else if (arbOrder.Amount + _threshold < _arbOrderAmount)
+                else if (arbOrder.Amount + arb_threshold < _arbOrderAmount)
                 {
                     //Double-check with BASE balance that ARB order was indeed partially filled
-                    if (baseBalance - _threshold > _lastBaseBalance)
+                    if (baseBalance - base_threshold > _lastBaseBalance)
                     {
                         _arbOrderAmount = arbOrder.Amount;
                         log("ARB order ID={0} partially filled. Remaining amount={1:0.0000} {2}.{3}",
@@ -262,7 +276,7 @@ namespace RippleBot
                             ConsoleColor.Yellow, _baseOrderId, _lastBaseBalance, baseBalance);
                     }
                 }
-                else if (arbOrder.Amount + _threshold < arbBalance)
+                else if (arbOrder.Amount + arb_threshold < arbBalance)
                 {
                     //ARB balance increased => BASE order was (partially) filled
                     log("BASE order bought some {0}.{1} (ARB balance={2:0.0000})", ConsoleColor.Cyan, _arbAssetCode, _arbGatewayName, arbBalance);
@@ -279,7 +293,7 @@ namespace RippleBot
                     log("ARB order ID={0} untouched (amount={1:0.0000} {2}.{3})", _arbOrderId, arbOrder.Amount, _arbAssetCode, _arbGatewayName);
 
                     List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_baseAssetCode, _baseGateway, true);
-                    double newPrice = suggestPrice(asks, _arbMinPrice, _arbMaxPrice, _arbOrderId, _arbOrderPrice);
+                    double newPrice = suggestPrice(asks, _arbMinPrice, _arbMaxPrice, _arbOrderId, _arbOrderPrice, _arbMinPriceUpdate);
 
                     if (!_arbOrderPrice.eq(newPrice))
                     {
@@ -288,7 +302,7 @@ namespace RippleBot
                     }
                 }
             }
-            else if (arbBalance > _threshold)
+            else if (arbBalance > arb_threshold)
             {
                 //We have some spare ARB assets to sell
                 createArbOrder(arbBalance);
@@ -318,7 +332,7 @@ namespace RippleBot
         }
 
 
-        private double suggestPrice(List<FiatAsk> asks, double minPrice, double maxPrice, int currentOrderId, double currentOrderPrice)
+        private double suggestPrice(List<FiatAsk> asks, double minPrice, double maxPrice, int currentOrderId, double currentOrderPrice, double minPriceUpdate)
         {
             if (null == asks || !asks.Any())
             {
@@ -326,8 +340,7 @@ namespace RippleBot
             }
 
             const int DEC_PLACES = 14;
-            const double INCREMENT = 0.0001;            //In same-fiat arbitrage we can afford this
-            const double MIN_PRICE_UPDATE = 0.00005;    //and this
+            double increment = 2.0 * minPriceUpdate;
 
             //Find first ASK price higher than minPrice
             foreach (FiatAsk ask in asks)
@@ -340,10 +353,10 @@ namespace RippleBot
 
                 if (ask.Price >= minPrice)
                 {
-                    double sellPrice = Math.Round(ask.Price - INCREMENT, DEC_PLACES);
+                    double sellPrice = Math.Round(ask.Price - increment, DEC_PLACES);
 
                     //The difference is too small. Leave previous price to avoid server call
-                    if (-1 != currentOrderId && Math.Abs(sellPrice - currentOrderPrice) < MIN_PRICE_UPDATE)
+                    if (-1 != currentOrderId && Math.Abs(sellPrice - currentOrderPrice) < minPriceUpdate)
                     {
                         log("DEBUG: price {0:0.00000} too similar, using previous", sellPrice);
                         return currentOrderPrice;
@@ -358,8 +371,8 @@ namespace RippleBot
             }
 
             //Order book filled with junk. Use order before last, so we see it in chart
-            double price = asks.Last().Price - INCREMENT;
-            if (-1 != currentOrderId && Math.Abs(price - currentOrderPrice) < MIN_PRICE_UPDATE)
+            double price = asks.Last().Price - increment;
+            if (-1 != currentOrderId && Math.Abs(price - currentOrderPrice) < minPriceUpdate)
             {
                 return currentOrderPrice;
             }
@@ -382,7 +395,7 @@ namespace RippleBot
             if (price.eq(-1.0))
             {
                 List<FiatAsk> asks = _baseRequestor.GetOrderBookAsks(_arbAssetCode, _arbGateway, true);
-                price = suggestPrice(asks, _baseMinPrice, _baseMaxPrice, _baseOrderId, _baseOrderPrice);
+                price = suggestPrice(asks, _baseMinPrice, _baseMaxPrice, _baseOrderId, _baseOrderPrice, _baseMinPriceUpdate);
             }
 
             int newOrderId = _baseRequestor.PlaceOrder(baseBalance, price, _arbAssetCode, _arbGateway);
@@ -410,7 +423,7 @@ namespace RippleBot
             if (price.eq(-1.0))
             {
                 List<FiatAsk> asks = _arbRequestor.GetOrderBookAsks(_baseAssetCode, _baseGateway, true);
-                price = suggestPrice(asks, _arbMinPrice, _arbMaxPrice, _arbOrderId, _arbOrderPrice);
+                price = suggestPrice(asks, _arbMinPrice, _arbMaxPrice, _arbOrderId, _arbOrderPrice, _arbMinPriceUpdate);
             }
 
             int newOrderId = _arbRequestor.PlaceOrder(arbBalance, price, _baseAssetCode, _baseGateway);

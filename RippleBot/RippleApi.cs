@@ -164,13 +164,13 @@ namespace RippleBot
         internal Offer GetOrderInfo(int orderId)        //TODO: delete
         {
             var offerList = getActiveOrders();
-            if (null == offerList)
+            if (null == offerList || null == offerList.result || null == offerList.result.offers)
             {
                 return null;
             }
             var order = offerList.result.offers.FirstOrDefault(o => o.seq == orderId);
 
-            //NULL means it was already filled BUG: OR CANCELLED!!! TODO: some better way of getting order status
+            //NULL means it was already filled or canceled
             if (null == order)
             {
                 return new Offer(true);

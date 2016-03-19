@@ -7,6 +7,7 @@ using Common.Business;
 
 namespace BitfinexBot
 {
+    //Wrong. Must parameterize LTC, USD
     internal class CrazyBuyerTrap : TraderBase
     {
         private BitfinexApi _requestor;
@@ -55,8 +56,8 @@ namespace BitfinexBot
         /// <summary>The core method to do one iteration of orders' check and updates</summary>
         protected override void Check()
         {
-            var market = _requestor.GetMarketDepth();
-            var tradeHistory = _requestor.GetTradeHistory();
+            var market = _requestor.GetMarketDepth("eth");
+            var tradeHistory = _requestor.GetTradeHistory("eth");
             var serverTime = _requestor.GetServerTime();
 
             var coef = TradeHelpers.GetMadness(tradeHistory, serverTime);
@@ -84,7 +85,7 @@ namespace BitfinexBot
                             //Evaluate and update if needed
                             if (newAmount > _sellOrderAmount || !_sellOrderPrice.eq(price))
                             {
-                                _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, price, ref newAmount);
+                                _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, "ltc", price, ref newAmount);
                                 _sellOrderAmount = newAmount;
                                 _sellOrderPrice = price;
                                 log("Updated SELL order ID={0}; amount={1} LTC; price={2} USD", _sellOrderId, _sellOrderAmount, price);
@@ -98,7 +99,7 @@ namespace BitfinexBot
                             var price = suggestSellPrice(market);
                             //The same price is totally unlikely, so we don't check it here
                             var amount = sellOrder.Amount;
-                            _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, price, ref amount);
+                            _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, "ltc", price, ref amount);
                             _sellOrderAmount = amount;
                             _sellOrderPrice = price;
                             log("Updated SELL order ID={0}; amount={1} LTC; price={2} USD", _sellOrderId, _sellOrderAmount, _sellOrderPrice);
@@ -123,7 +124,7 @@ namespace BitfinexBot
             {
                 _sellOrderPrice = suggestSellPrice(market);
                 var amount = _operativeAmount - _buyOrderAmount;
-                _sellOrderId = _requestor.PlaceSellOrder(_sellOrderPrice, ref amount);
+                _sellOrderId = _requestor.PlaceSellOrder("ltc", _sellOrderPrice, ref amount);
                 _sellOrderAmount = amount;
                 log("Successfully created SELL order with ID={0}; amount={1} LTC; price={2} USD", ConsoleColor.Cyan, _sellOrderId, _sellOrderAmount, _sellOrderPrice);
             }
@@ -148,7 +149,7 @@ namespace BitfinexBot
                                 if (!buyOrder.Amount.eq(_buyOrderAmount))
                                 {
                                     log("BUY order ID={0} partially filled at price={1} USD. Remaining amount={2} LTC;", ConsoleColor.Green, _buyOrderId, buyOrder.price, buyOrder.Amount);
-                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, buyOrder.Amount);
+                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, "ltc", price, buyOrder.Amount);
                                     _buyOrderAmount = buyOrder.Amount;
                                     _buyOrderPrice = price;
                                     log("Updated BUY order ID={0}; amount={1} LTC; price={2} USD", _buyOrderId, _buyOrderAmount, price);
@@ -158,7 +159,7 @@ namespace BitfinexBot
                                 {
                                     var newAmount = _operativeAmount - _sellOrderAmount;
                                     log("SELL dumped some LTC. Increasing BUY amount to {0} LTC", ConsoleColor.Cyan, newAmount);
-                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, newAmount);
+                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, "ltc", price, newAmount);
                                     _buyOrderAmount = newAmount;
                                     _buyOrderPrice = price;
                                     log("Updated BUY order ID={0}; amount={1} LTC; price={2} USD", _buyOrderId, _buyOrderAmount, price);
@@ -166,7 +167,7 @@ namespace BitfinexBot
                                 //Or if we simply need to change price.
                                 else if (!_buyOrderPrice.eq(price))
                                 {
-                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, price, _buyOrderAmount);
+                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, "ltc", price, _buyOrderAmount);
                                     _buyOrderPrice = price;
                                     log("Updated BUY order ID={0}; amount={1} LTC; price={2} USD", _buyOrderId, _buyOrderAmount, price);
                                 }
@@ -189,12 +190,12 @@ namespace BitfinexBot
                 {
                     _buyOrderPrice = SuggestBuyPrice(market);
                     _buyOrderAmount = _operativeAmount - _sellOrderAmount;
-                    _buyOrderId = _requestor.PlaceBuyOrder(_buyOrderPrice, _buyOrderAmount);
+                    _buyOrderId = _requestor.PlaceBuyOrder("ltc", _buyOrderPrice, _buyOrderAmount);
                     log("Successfully created BUY order with ID={0}; amount={1} LTC; price={2} USD", ConsoleColor.Cyan, _buyOrderId, _buyOrderAmount, _buyOrderPrice);
                 }
             }
 
-            var balance = _requestor.GetAccountBalance().AvailableLtc;
+            var balance = _requestor.GetAccountBalance("ltc").Available;
             log("DEBUG: Balance = {0} LTC", balance);
             log(new string('=', 84));
         }

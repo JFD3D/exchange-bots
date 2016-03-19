@@ -11,7 +11,7 @@ namespace BitfinexBot.Business
         [DataMember] internal string amount { get; set; }
         [DataMember] internal string available { get; set; }
 
-        internal double AvailableLtc
+        internal double Available
         {
             get { return double.Parse(available); }
         }

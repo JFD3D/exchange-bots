@@ -36,7 +36,9 @@ namespace BitfinexBot
 
             var nonceOffset = Configuration.GetValue("nonce_offset");
             if (!String.IsNullOrEmpty(nonceOffset))
+            {
                 _nonceOffset = long.Parse(nonceOffset);
+            }
         }
 
 
@@ -46,15 +48,15 @@ namespace BitfinexBot
             return Helpers.DeserializeJSON<TickerResponse>(data).ServerTime;
         }
 
-        internal MarketDepthResponse GetMarketDepth(byte maxItems = 15)
+        internal MarketDepthResponse GetMarketDepth(string cryptoCurrencyCode, byte maxItems = 15)
         {
-            var data = sendGetRequest(String.Format("{0}book/ltcusd?limit_bids={1}&limit_asks={1}", BASE_URL, maxItems));
+            var data = sendGetRequest(String.Format("{0}book/{1}usd?limit_bids={2}&limit_asks={2}", BASE_URL, cryptoCurrencyCode, maxItems));
             return Helpers.DeserializeJSON<MarketDepthResponse>(data);
         }
 
-        internal List<Trade> GetTradeHistory(DateTime? since = null)
+        internal List<Trade> GetTradeHistory(string cryptoCurrencyCode, DateTime? since = null)
         {
-            var path = BASE_URL + "trades/ltcusd";
+            var path = BASE_URL + "trades/" + cryptoCurrencyCode + "usd";
             if (null != since)
             {
                 var serverDiff = new TimeSpan(-2, 0, 0);
@@ -67,13 +69,13 @@ namespace BitfinexBot
             return trades;
         }
 
-        /// <summary>Get LTC exchange balance</summary>
-        internal Balance GetAccountBalance()
+        /// <summary>Get exchange balance for given currency</summary>
+        internal Balance GetAccountBalance(string currency)
         {
             var data = sendPostRequest("balances");
 
             var balances = Helpers.DeserializeJSON<List<Balance>>(data);
-            return balances.First(b => b.type == "exchange" && b.currency == "ltc");
+            return balances.First(b => b.type == "exchange" && b.currency == currency);
         }
 
         internal OrderInforResponse GetOrderInfo(int orderId)
@@ -87,11 +89,11 @@ namespace BitfinexBot
             return Helpers.DeserializeJSON<OrderInforResponse>(data);
         }
 
-        internal int PlaceBuyOrder(double price, double amount)
+        internal int PlaceBuyOrder(string cryptoCurrencyCode, double price, double amount)
         {
             var paramz = new List<Tuple<string, string>>
             {
-                new Tuple<string, string>("\"symbol\"", "\"ltcusd\""),
+                new Tuple<string, string>("\"symbol\"", "\"" + cryptoCurrencyCode + "usd\""),
                 new Tuple<string, string>("\"amount\"", "\"" + amount.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"price\"", "\"" + price.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"exchange\"", "\"bitfinex\""),
@@ -103,26 +105,30 @@ namespace BitfinexBot
 
             var error = Helpers.DeserializeJSON<ErrorResponse>(data);
             if (!String.IsNullOrEmpty(error.message))
+            {
                 throw new Exception(String.Format("Error creating BUY order (price={0}, amount={1}). Messages={2}", price, amount, error.message));
+            }
 
             var response = Helpers.DeserializeJSON<OrderInforResponse>(data);
             return response.id;
         }
 
-        internal int UpdateBuyOrder(int orderId, double price, double amount)
+        internal int UpdateBuyOrder(int orderId, string cryptoCurrencyCode, double price, double amount)
         {
             //Cancel the old order, recreate
             if (CancelOrder(orderId))
-                return PlaceBuyOrder(price, amount);
+            {
+                return PlaceBuyOrder(cryptoCurrencyCode, price, amount);
+            }
             //It's been closed meanwhile. Leave it be, very next iteration will find and handle properly
             return orderId;
         }
 
-        internal int PlaceSellOrder(double price, ref double amount)
+        internal int PlaceSellOrder(string cryptoCurrencyCode, double price, ref double amount)
         {
             var paramz = new List<Tuple<string, string>>
             {
-                new Tuple<string, string>("\"symbol\"", "\"ltcusd\""),
+                new Tuple<string, string>("\"symbol\"", "\"" + cryptoCurrencyCode + "usd\""),
                 new Tuple<string, string>("\"amount\"", "\"" + amount.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"price\"", "\"" + price.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"exchange\"", "\"bitfinex\""),
@@ -137,21 +143,24 @@ namespace BitfinexBot
             {
                 if ("Invalid order: not enough balance" == error.message)
                 {
-                    //LTC balance changed meanwhile, probably SELL order was (partially) filled
+                    //balance changed meanwhile, probably SELL order was (partially) filled
                     _logger.AppendMessage("WARN: Insufficient balance reported when creating SELL order with amount=" + amount, true, ConsoleColor.Yellow);
-                    var accountInfo = GetAccountBalance();
+                    var accountInfo = GetAccountBalance(cryptoCurrencyCode);
                     var oldAmount = amount;
-                    amount = Math.Floor(accountInfo.AvailableLtc * 100.0) / 100.0;  //The math is protection against bad precision
+                    amount = Math.Floor(accountInfo.Available * 100.0) / 100.0;  //The math is protection against bad precision
 
                     if (oldAmount < amount)
                     {
-                        _logger.AppendMessage("Available balance is " + amount + " LTC. Trying to repeat with " + oldAmount, true, ConsoleColor.Yellow);
+                        _logger.AppendMessage("Available balance is " + amount + " " + cryptoCurrencyCode + ". Trying to repeat with " + oldAmount, true, ConsoleColor.Yellow);
                         amount = oldAmount;
                     }
                     else
-                        _logger.AppendMessage("Available account balance is " + amount + " LTC. Using this as amount for SELL order", true, ConsoleColor.Yellow);
+                    {
+                        _logger.AppendMessage("Available account balance is " + amount + " " + cryptoCurrencyCode + ". Using this as amount for SELL order",
+                                              true, ConsoleColor.Yellow);
+                    }
 
-                    return PlaceSellOrder(price, ref amount);
+                    return PlaceSellOrder(cryptoCurrencyCode, price, ref amount);
                 }
 
                 throw new Exception(String.Format("Error creating SELL order (price={0}; amount={1}). Message={2}", price, amount, error.message));
@@ -161,11 +170,13 @@ namespace BitfinexBot
             return response.id;
         }
 
-        internal int UpdateSellOrder(int orderId, double price, ref double amount)
+        internal int UpdateSellOrder(int orderId, string cryptoCurrencyCode, double price, ref double amount)
         {
             //Cancel the old order, recreate
             if (CancelOrder(orderId))
-                return PlaceSellOrder(price, ref amount);
+            {
+                return PlaceSellOrder(cryptoCurrencyCode, price, ref amount);
+            }
             //It's been closed meanwhile. Leave it be, very next iteration will find and handle properly
             return orderId;
         }

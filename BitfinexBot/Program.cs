@@ -30,7 +30,7 @@ namespace BitfinexBot
                     trader = new CrazyBuyerTrap(logger);
                     break;
                 case "cst":
-                    trader = new CrazySellerTrapEth(logger);
+                    trader = new CrazySellerTrap(logger);
                     break;
                 case "bear":
                     throw new NotImplementedException("Soon...");

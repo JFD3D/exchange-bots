@@ -13,7 +13,7 @@ namespace BitfinexBot.Business
         [DataMember] internal string amount { get; set; }
         [DataMember] internal string available { get; set; }
 
-        /// <summary>Overall amount of the underlying account</summary>
+        /// <summary>Overall amount of the underlying account and respective currency</summary>
         internal double Amount
         {
             get { return double.Parse(amount); }

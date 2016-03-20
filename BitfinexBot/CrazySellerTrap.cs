@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+
 using BitfinexBot.Business;
 using Common;
 using Common.Business;
@@ -7,7 +8,7 @@ using Common.Business;
 
 namespace BitfinexBot
 {
-    internal class CrazySellerTrapEth : TraderBase
+    internal class CrazySellerTrap : TraderBase
     {
         private BitfinexApi _requestor;
 
@@ -41,7 +42,7 @@ namespace BitfinexBot
         private double _executedBuyPrice = -1.0;
 
 
-        public CrazySellerTrapEth(Logger logger) : base(logger)
+        public CrazySellerTrap(Logger logger) : base(logger)
         { }
 
         protected override void Initialize()

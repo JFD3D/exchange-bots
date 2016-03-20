@@ -50,13 +50,13 @@ namespace BitfinexBot
 
         internal MarketDepthResponse GetMarketDepth(string cryptoCurrencyCode, byte maxItems = 15)
         {
-            var data = sendGetRequest(String.Format("{0}book/{1}usd?limit_bids={2}&limit_asks={2}", BASE_URL, cryptoCurrencyCode, maxItems));
+            var data = sendGetRequest(String.Format("{0}book/{1}usd?limit_bids={2}&limit_asks={2}", BASE_URL, cryptoCurrencyCode.ToLowerInvariant(), maxItems));
             return Helpers.DeserializeJSON<MarketDepthResponse>(data);
         }
 
         internal List<Trade> GetTradeHistory(string cryptoCurrencyCode, DateTime? since = null)
         {
-            var path = BASE_URL + "trades/" + cryptoCurrencyCode + "usd";
+            var path = BASE_URL + "trades/" + cryptoCurrencyCode.ToLowerInvariant() + "usd";
             if (null != since)
             {
                 var serverDiff = new TimeSpan(-2, 0, 0);
@@ -70,12 +70,12 @@ namespace BitfinexBot
         }
 
         /// <summary>Get exchange balance for given currency</summary>
-        internal Balance GetAccountBalance(string currency)
+        internal List<Balance> GetAccountBalances()
         {
             var data = sendPostRequest("balances");
 
             var balances = Helpers.DeserializeJSON<List<Balance>>(data);
-            return balances.First(b => b.type == "exchange" && b.currency == currency);
+            return balances;
         }
 
         internal OrderInforResponse GetOrderInfo(int orderId)
@@ -93,7 +93,7 @@ namespace BitfinexBot
         {
             var paramz = new List<Tuple<string, string>>
             {
-                new Tuple<string, string>("\"symbol\"", "\"" + cryptoCurrencyCode + "usd\""),
+                new Tuple<string, string>("\"symbol\"", "\"" + cryptoCurrencyCode.ToLowerInvariant() + "usd\""),
                 new Tuple<string, string>("\"amount\"", "\"" + amount.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"price\"", "\"" + price.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"exchange\"", "\"bitfinex\""),
@@ -128,7 +128,7 @@ namespace BitfinexBot
         {
             var paramz = new List<Tuple<string, string>>
             {
-                new Tuple<string, string>("\"symbol\"", "\"" + cryptoCurrencyCode + "usd\""),
+                new Tuple<string, string>("\"symbol\"", "\"" + cryptoCurrencyCode.ToLowerInvariant() + "usd\""),
                 new Tuple<string, string>("\"amount\"", "\"" + amount.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"price\"", "\"" + price.ToString("0.000") + "\""),
                 new Tuple<string, string>("\"exchange\"", "\"bitfinex\""),
@@ -145,7 +145,7 @@ namespace BitfinexBot
                 {
                     //balance changed meanwhile, probably SELL order was (partially) filled
                     _logger.AppendMessage("WARN: Insufficient balance reported when creating SELL order with amount=" + amount, true, ConsoleColor.Yellow);
-                    var accountInfo = GetAccountBalance(cryptoCurrencyCode);
+                    var accountInfo = GetAccountBalances().GetExchangeBalance(cryptoCurrencyCode);
                     var oldAmount = amount;
                     amount = Math.Floor(accountInfo.Available * 100.0) / 100.0;  //The math is protection against bad precision
 

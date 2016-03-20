@@ -195,7 +195,7 @@ namespace BitfinexBot
                 }
             }
 
-            var balance = _requestor.GetAccountBalance("ltc").Available;
+            var balance = _requestor.GetAccountBalances().GetExchangeBalance("ltc").Available;
             log("DEBUG: Balance = {0} LTC", balance);
             log(new string('=', 84));
         }

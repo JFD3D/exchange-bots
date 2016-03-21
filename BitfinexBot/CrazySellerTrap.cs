@@ -124,7 +124,6 @@ namespace BitfinexBot
                             _executedBuyPrice = -1.0;
                             _buyOrderId = -1;
                             log("BUY order ID={0} (amount={1} {2}) was cancelled. Let's start again", ConsoleColor.Yellow, buyOrder.id, _buyOrderAmount, _cryptoCurrencyCode);
-                            _buyOrderAmount = 0;
                             break;
                         }
                     default:

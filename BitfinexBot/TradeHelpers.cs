@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using BitfinexBot.Business;
 using Common;
 
@@ -18,7 +19,9 @@ namespace BitfinexBot
             //Trades of past 4mins
             List<Trade> trades = tradeHistory.Where(trade => trade.Time >= now.AddSeconds(-240)).ToList();
             if (!trades.Any())
+            {
                 return 0.0f;
+            }
 
             //Group by time, so that single trade with big volume doesn't look like many trades
             var groupped = new Dictionary<string, Trade>();
@@ -26,14 +29,20 @@ namespace BitfinexBot
             {
                 var key = trade.timestamp + "_" + trade.type;
                 if (!groupped.ContainsKey(key))
+                {
                     groupped.Add(key, new Trade(trade.Price, trade.Amount, trade.Type));
+                }
                 else
                 {
                     groupped[key].Amount += trade.Amount;
                     if (TradeType.BUY == trade.Type && trade.Amount > groupped[key].Amount)
+                    {
                         groupped[key].Amount = trade.Amount;
+                    }
                     else if (TradeType.SELL == trade.Type && trade.Amount < groupped[key].Amount)
+                    {
                         groupped[key].Amount = trade.Amount;
+                    }
                 }
             }
 
@@ -43,23 +52,35 @@ namespace BitfinexBot
             const int MAX_TRADES = 10;
             float intenseCoef;
             if (groupped.Count < MIN_TRADES)        //Too few trades
+            {
                 intenseCoef = 0.0f;
+            }
             else if (groupped.Count >= MAX_TRADES)  //Too many trades
+            {
                 intenseCoef = 1.0f;
+            }
             else
+            {
                 intenseCoef = (float)(groupped.Count - MIN_TRADES) / (MAX_TRADES - MIN_TRADES);
+            }
 
             const double MIN_AVG_VOLUME = 10;
-            const double MAX_AVG_VOLUME = 35;
+            const double MAX_AVG_VOLUME = 60;
             float volumeCoef;
             double avgVolume = groupped.Sum(trade => trade.Value.Amount) / groupped.Count;
             //        Console.WriteLine("DEBUG: avgVolume={0}", avgVolume);
             if (avgVolume < MIN_AVG_VOLUME)
+            {
                 volumeCoef = 0.0f;
+            }
             else if (avgVolume >= MAX_AVG_VOLUME)
+            {
                 volumeCoef = 1.0f;
+            }
             else
+            {
                 volumeCoef = (float)((avgVolume - MIN_AVG_VOLUME) / (MAX_AVG_VOLUME - MIN_AVG_VOLUME));
+            }
 
             //        Console.WriteLine("DEBUG: intensityCoef={0}, volumeCoef={1}", intenseCoef, volumeCoef);
 

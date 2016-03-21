@@ -118,6 +118,15 @@ namespace BitfinexBot
                             _buyOrderAmount = 0;
                             break;
                         }
+                    case OrderStatus.Cancelled:
+                        {
+                            //Reset everything so we can start all over
+                            _executedBuyPrice = -1.0;
+                            _buyOrderId = -1;
+                            log("BUY order ID={0} (amount={1} {2}) was cancelled. Let's start again", ConsoleColor.Yellow, buyOrder.id, _buyOrderAmount, _cryptoCurrencyCode);
+                            _buyOrderAmount = 0;
+                            break;
+                        }
                     default:
                         var message = String.Format("BUY order ID={0} has unexpected status '{1}'", _buyOrderId, buyOrder.Status);
                         log(message, ConsoleColor.Red);
@@ -181,6 +190,14 @@ namespace BitfinexBot
                         case OrderStatus.Closed:
                             {
                                 log("SELL order ID={0} (amount={1} {2}) was closed at price={3} USD", ConsoleColor.Green, _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode, sellOrder.Price);
+                                _sellOrderAmount = 0;
+                                _sellOrderId = -1;
+                                break;
+                            }
+                        case OrderStatus.Cancelled:
+                            {
+                                //Reset everything so we can start all over (?)
+                                log("SELL order ID={0} (amount={1} {2}) was cancelled", ConsoleColor.Green, _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode);
                                 _sellOrderAmount = 0;
                                 _sellOrderId = -1;
                                 break;

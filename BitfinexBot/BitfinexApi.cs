@@ -106,7 +106,7 @@ namespace BitfinexBot
             var error = Helpers.DeserializeJSON<ErrorResponse>(data);
             if (!String.IsNullOrEmpty(error.message))
             {
-                throw new Exception(String.Format("Error creating BUY order (price={0}, amount={1}). Messages={2}", price, amount, error.message));
+                throw new Exception(String.Format("Error creating BUY order (price={0}, amount={1}). Message={2}", price, amount, error.message));
             }
 
             var response = Helpers.DeserializeJSON<OrderInforResponse>(data);
@@ -141,7 +141,7 @@ namespace BitfinexBot
             var error = Helpers.DeserializeJSON<ErrorResponse>(data);
             if (!String.IsNullOrEmpty(error.message))
             {
-                if ("Invalid order: not enough balance" == error.message)
+                if (null != error.message && error.message.Contains("not enough exchange balance"))
                 {
                     //balance changed meanwhile, probably SELL order was (partially) filled
                     _logger.AppendMessage("WARN: Insufficient balance reported when creating SELL order with amount=" + amount, true, ConsoleColor.Yellow);

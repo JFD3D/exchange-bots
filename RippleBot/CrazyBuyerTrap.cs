@@ -70,7 +70,13 @@ namespace RippleBot
             var cleanup = Configuration.GetValue("cleanup_zombies");
             _cleanup = bool.Parse(cleanup ?? false.ToString());
 
-            _requestor = new RippleApi(_logger, _gateway, _currencyCode);
+            string dataApiUrl = Configuration.GetValue("data_api_url");
+            if (String.IsNullOrEmpty(dataApiUrl))
+            {
+                throw new Exception("Configuration value data_api_url not found!");
+            }
+
+            _requestor = new RippleApi(_logger, dataApiUrl, _gateway, _currencyCode);
             _requestor.Init();
             log("CST trader started for currency {0} with operative={1}; MinWall={2}; MaxWall={3}",
                 _currencyCode, _operativeAmount, _minWallVolume, _maxWallVolume);

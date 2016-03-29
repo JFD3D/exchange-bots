@@ -17,7 +17,7 @@ namespace RippleBot
     internal class RippleApi //futile : IDisposable
     {
         private const int SOCKET_TIMEOUT = 12000;
-        private const string DATA_API_URL = "https://data.ripple.com/v2";           //TODO: config value
+        private string _dataApiUrl;
         private const int DATA_TIMEOUT = 40 * 1000;     //40sec timeout for data API
         private const byte RETRY_COUNT = 10;
         private const int RETRY_DELAY = 2000;
@@ -39,9 +39,10 @@ namespace RippleBot
         private readonly Regex _offerPattern = new Regex("\"taker_(?<verb>get|pay)s\":\"(?<value>\\d{1,20})\"");
 
 
-        internal RippleApi(Logger logger, string exchIssuerAddress, string fiatCurrencyCode)
+        internal RippleApi(Logger logger, string dataApiUrl, string exchIssuerAddress, string fiatCurrencyCode)
         {
             _logger = logger;
+            _dataApiUrl = dataApiUrl;
             _issuerAddress = exchIssuerAddress;
             _fiatCurreny = fiatCurrencyCode;
 
@@ -85,7 +86,7 @@ namespace RippleBot
         /// <remarks>Uses data API (REST-like)</remarks>
         internal double GetBalance2(string assetCode, string assetGateway=null)
         {
-            var url = String.Format("{0}/accounts/{1}/balances", DATA_API_URL, _walletAddress);
+            var url = String.Format("{0}/accounts/{1}/balances", _dataApiUrl, _walletAddress);
 
             var webClient = new WebClient2(_logger, DATA_TIMEOUT);
 
@@ -704,7 +705,7 @@ namespace RippleBot
             const int limit = 10;
 
             var url = String.Format("{0}/exchanges/{1}/{2}?descending=true&limit={3}&result=tesSUCCESS&type=OfferCreate",
-                                    DATA_API_URL, assetDef1, assetDef2, limit);
+                                    _dataApiUrl, assetDef1, assetDef2, limit);
 
             var data = webClient.DownloadObject<ExchangeHistoryResponse>(url);
             return data;
@@ -794,7 +795,7 @@ namespace RippleBot
         private AccountOrdersResponse getActiveOrders2()
         {
             var webClient = new WebClient2(_logger, DATA_TIMEOUT);
-            var url = String.Format("{0}/accounts/{1}/orders", DATA_API_URL, _walletAddress);
+            var url = String.Format("{0}/accounts/{1}/orders", _dataApiUrl, _walletAddress);
 
             AccountOrdersResponse data = webClient.DownloadObject<AccountOrdersResponse>(url);
 

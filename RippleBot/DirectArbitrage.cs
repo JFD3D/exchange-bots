@@ -92,9 +92,15 @@ namespace RippleBot
             var cleanup = Configuration.GetValue("cleanup_zombies");
             _cleanup = bool.Parse(cleanup ?? false.ToString());
 
-            _baseRequestor = new RippleApi(_logger, _baseGateway, _baseAssetCode);
+            string dataApiUrl = Configuration.GetValue("data_api_url");
+            if (String.IsNullOrEmpty(dataApiUrl))
+            {
+                throw new Exception("Configuration value data_api_url not found!");
+            }
+
+            _baseRequestor = new RippleApi(_logger, dataApiUrl, _baseGateway, _baseAssetCode);
             _baseRequestor.Init();
-            _arbRequestor = new RippleApi(_logger, _arbGateway, _arbAssetCode);
+            _arbRequestor = new RippleApi(_logger, dataApiUrl, _arbGateway, _arbAssetCode);
             _arbRequestor.Init();
             log("Direct arbitrage trader started for pair {0}.{1} / {2}.{3}; base_min={4:0.0000}; arb_min={5:0.0000}",
                 _baseAssetCode, _baseGatewayName, _arbAssetCode, _arbGatewayName, _arbMinPrice, _baseMinPrice);

@@ -58,7 +58,14 @@ namespace RippleBot
 
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             log("Wide spread trader for RippleCN initialized with operative={0}; MinSpread={1}", _operativeAmount, MIN_SPREAD);
-            _requestor = new RippleApi(_logger, _gateway, _currencyCode);
+
+            string dataApiUrl = Configuration.GetValue("data_api_url");
+            if (String.IsNullOrEmpty(dataApiUrl))
+            {
+                throw new Exception("Configuration value data_api_url not found!");
+            }
+
+            _requestor = new RippleApi(_logger, dataApiUrl, _gateway, _currencyCode);
             _requestor.Init();
         }
 
@@ -68,7 +75,9 @@ namespace RippleBot
             var market = _requestor.GetMarketDepth();
 
             if (null == market)
+            {
                 return;
+            }
 
             var spread = Math.Round(getLowestAsk(market) - getHighestBid(market), 5);
 

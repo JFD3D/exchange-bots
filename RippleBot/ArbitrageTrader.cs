@@ -48,9 +48,15 @@ namespace RippleBot
             _arbFactor = double.Parse(Configuration.GetValue("profit_factor"));
             _intervalMs = 8000;
 
-            _baseRequestor = new RippleApi(_logger, _baseGateway, _baseCurrency);
+            string dataApiUrl = Configuration.GetValue("data_api_url");
+            if (String.IsNullOrEmpty(dataApiUrl))
+            {
+                throw new Exception("Configuration value data_api_url not found!");
+            }
+
+            _baseRequestor = new RippleApi(_logger, dataApiUrl, _baseGateway, _baseCurrency);
             _baseRequestor.Init();
-            _arbRequestor = new RippleApi(_logger, _arbGateway, _arbCurrency);
+            _arbRequestor = new RippleApi(_logger, dataApiUrl, _arbGateway, _arbCurrency);
             _arbRequestor.Init();
             log("Arbitrage trader started for currencies {0}, {1} with parity={2:0.000}; profit factor={3}", _baseCurrency, _arbCurrency, _parity, _arbFactor);
         }

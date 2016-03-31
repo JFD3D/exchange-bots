@@ -199,7 +199,7 @@ namespace BitfinexBot
             }
 
             var balances = _requestor.GetAccountBalances();
-            var cryptoBalance = balances.GetExchangeBalance(_cryptoCurrencyCode).Available;
+            var cryptoBalance = balances.GetExchangeBalance(_cryptoCurrencyCode).Amount;
             var fiadBalance = balances.GetExchangeBalance("USD").Amount;
             log("DEBUG: Balances = {0} {1}; {2} USD", cryptoBalance, _cryptoCurrencyCode, fiadBalance);
             log(new string('=', 80));

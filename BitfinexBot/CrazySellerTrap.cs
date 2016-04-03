@@ -14,6 +14,9 @@ namespace BitfinexBot
 
         private string _cryptoCurrencyCode;
 
+        //Bitfinex returns error when trying to create an order with too small volume
+        private const double MIN_ORDER_AMOUNT = 0.1;
+
         //CRYPTO amount to trade
         private double _operativeAmount;
         private double _minWallVolume;
@@ -102,11 +105,19 @@ namespace BitfinexBot
                                 _buyOrderAmount = buyOrder.Amount;
                                 log("BUY order ID={0} partially filled at price={1} USD. Remaining amount={2} {3};",
                                     ConsoleColor.Green, _buyOrderId, _executedBuyPrice, buyOrder.Amount, _cryptoCurrencyCode);
-                                var price = SuggestBuyPrice(market);
-                                //The same price is totally unlikely, so we don't check it here
-                                _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, _cryptoCurrencyCode, price, buyOrder.Amount);
-                                _buyOrderPrice = price;
-                                log("Updated BUY order ID={0}; amount={1} {2}; price={3} USD", _buyOrderId, _buyOrderAmount, _cryptoCurrencyCode, _buyOrderPrice);
+
+                                if (_buyOrderAmount <= MIN_ORDER_AMOUNT)
+                                {
+                                    log("The BUY remaining amount is too small, will not update", ConsoleColor.Cyan);
+                                }
+                                else
+                                {
+                                    var price = SuggestBuyPrice(market);
+                                    //The same price is totally unlikely, so we don't check it here
+                                    _buyOrderId = _requestor.UpdateBuyOrder(_buyOrderId, _cryptoCurrencyCode, price, buyOrder.Amount);
+                                    _buyOrderPrice = price;
+                                    log("Updated BUY order ID={0}; amount={1} {2}; price={3} USD", _buyOrderId, _buyOrderAmount, _cryptoCurrencyCode, _buyOrderPrice);
+                                }
                             }
                             break;
                         }
@@ -163,10 +174,18 @@ namespace BitfinexBot
                                     log("SELL order ID={0} partially filled at price={1} USD. Remaining amount={2} {3};",
                                         ConsoleColor.Green, _sellOrderId, sellOrder.Price, sellOrder.Amount, _cryptoCurrencyCode);
                                     var amount = sellOrder.Amount;
-                                    _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, _cryptoCurrencyCode, price, ref amount);
-                                    _sellOrderAmount = amount;
-                                    _sellOrderPrice = price;
-                                    log("Updated SELL order ID={0}; amount={1} {2}; price={3} USD", _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode, price);
+
+                                    if (amount <= MIN_ORDER_AMOUNT)
+                                    {
+                                        log("The SELL remaining amount is too small, will not update", ConsoleColor.Cyan);
+                                    }
+                                    else
+                                    {
+                                        _sellOrderId = _requestor.UpdateSellOrder(_sellOrderId, _cryptoCurrencyCode, price, ref amount);
+                                        _sellOrderAmount = amount;
+                                        _sellOrderPrice = price;
+                                        log("Updated SELL order ID={0}; amount={1} {2}; price={3} USD", _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode, price);
+                                    }
                                 }
                                 //If there were some money released by filling a BUY order, increase this SELL order
                                 else if (_operativeAmount - _buyOrderAmount > _sellOrderAmount)

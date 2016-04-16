@@ -143,7 +143,7 @@ namespace BitfinexBot
                         throw new Exception(message);
                 }
             }
-            else if (_operativeAmount - _sellOrderAmount > 0.00001)    //No BUY order (and there are some money available). So create one
+            else if (_operativeAmount - _sellOrderAmount > MIN_ORDER_AMOUNT)    //No BUY order (and there are some money available). So create one
             {
                 _buyOrderPrice = SuggestBuyPrice(market);
                 _buyOrderAmount = _operativeAmount - _sellOrderAmount;
@@ -230,9 +230,17 @@ namespace BitfinexBot
                 {
                     _sellOrderPrice = SuggestSellPrice(market);
                     var amount = _operativeAmount - _buyOrderAmount;
-                    _sellOrderId = _requestor.PlaceSellOrder(_cryptoCurrencyCode, _sellOrderPrice, ref amount);
-                    _sellOrderAmount = amount;
-                    log("Successfully created SELL order with ID={0}; amount={1} {2}; price={3} USD", ConsoleColor.Cyan, _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode, _sellOrderPrice);
+                    if (amount <= MIN_ORDER_AMOUNT)
+                    {
+                        log("The SELL available amount {0} is too small, will not create", amount, ConsoleColor.Cyan);
+                    }
+                    else
+                    {
+                        _sellOrderId = _requestor.PlaceSellOrder(_cryptoCurrencyCode, _sellOrderPrice, ref amount);
+                        _sellOrderAmount = amount;
+                        log("Successfully created SELL order with ID={0}; amount={1} {2}; price={3} USD",
+                            ConsoleColor.Cyan, _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode, _sellOrderPrice);
+                    }
                 }
             }
 

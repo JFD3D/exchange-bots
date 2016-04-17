@@ -14,7 +14,7 @@ namespace BitfinexBot
 
         private string _cryptoCurrencyCode;
 
-        //Bitfinex returns error when trying to create an order with too small volume
+        //Bitfinex returns error when trying to create an order with too small volume (TODO: isn't that ETH-specific?)
         private const double MIN_ORDER_AMOUNT = 0.1;
 
         //CRYPTO amount to trade
@@ -60,7 +60,7 @@ namespace BitfinexBot
 
             log(String.Format("Bitfinex {0} CST trader initialized with operative={1}; minWall={2}; maxWall={3}",
                               _cryptoCurrencyCode, _operativeAmount, _minWallVolume, _maxWallVolume));
-            _requestor = new BitfinexApi(_logger);
+            _requestor = new BitfinexApi(_logger, MIN_ORDER_AMOUNT);
         }
 
         protected override void Check()
@@ -215,7 +215,7 @@ namespace BitfinexBot
                         case OrderStatus.Cancelled:
                             {
                                 //Reset everything so we can start all over (?)
-                                log("SELL order ID={0} (amount={1} {2}) was cancelled", ConsoleColor.Green, _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode);
+                                log("SELL order ID={0} (amount={1} {2}) was cancelled", ConsoleColor.Yellow, _sellOrderId, _sellOrderAmount, _cryptoCurrencyCode);
                                 _sellOrderAmount = 0;
                                 _sellOrderId = -1;
                                 break;
@@ -232,7 +232,7 @@ namespace BitfinexBot
                     var amount = _operativeAmount - _buyOrderAmount;
                     if (amount <= MIN_ORDER_AMOUNT)
                     {
-                        log("The SELL available amount {0} is too small, will not create", amount, ConsoleColor.Cyan);
+                        log("The available amount {0} {1} is too small for SELL, will not create", amount, _cryptoCurrencyCode, ConsoleColor.Cyan);
                     }
                     else
                     {

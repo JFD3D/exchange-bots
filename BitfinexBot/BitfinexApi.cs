@@ -20,10 +20,16 @@ namespace BitfinexBot
         private const int RETRY_DELAY = 1000;
 
         private readonly Logger _logger;
+        private readonly double _minOrderAmount;
         private readonly long _nonceOffset;
         private readonly WebProxy _webProxy;
 
-        public BitfinexApi(Logger logger)
+        /// <summary>Bitfinex JSON API helper</summary>
+        /// <param name="logger">Logger</param>
+        /// <param name="minOrderAmount">
+        /// Minimum order amount to use when troubleshooting balance inconsistencies
+        /// </param>
+        public BitfinexApi(Logger logger, double minOrderAmount)
         {
             _logger = logger;
             var proxyHost = Configuration.GetValue("proxyHost");
@@ -33,6 +39,8 @@ namespace BitfinexBot
                 _webProxy = new WebProxy(proxyHost, int.Parse(proxyPort));
                 _webProxy.Credentials = CredentialCache.DefaultCredentials;
             }
+
+            _minOrderAmount = minOrderAmount;
 
             var nonceOffset = Configuration.GetValue("nonce_offset");
             if (!String.IsNullOrEmpty(nonceOffset))
@@ -156,8 +164,16 @@ namespace BitfinexBot
                     }
                     else
                     {
-                        _logger.AppendMessage("Available account balance is " + amount + " " + cryptoCurrencyCode + ". Using this as amount for SELL order",
-                                              true, ConsoleColor.Yellow);
+                        if (amount < _minOrderAmount)
+                        {
+                            _logger.AppendMessage("Available balance is only {0}. No actual order is going to be created", true, ConsoleColor.Yellow);
+                            return -1;
+                        }
+                        else
+                        {
+                            _logger.AppendMessage("Available balance is " + amount + " " + cryptoCurrencyCode + ". Using this as amount for SELL order",
+                                                  true, ConsoleColor.Yellow);
+                        }
                     }
 
                     return PlaceSellOrder(cryptoCurrencyCode, price, ref amount);

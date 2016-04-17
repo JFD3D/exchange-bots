@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+
 using BitfinexBot.Business;
 using Common;
 using Common.Business;
@@ -7,23 +8,26 @@ using Common.Business;
 
 namespace BitfinexBot
 {
-    //Wrong. Must parameterize LTC, USD
+    //Wrong. Must parameterize CRPTO, USD
     internal class CrazyBuyerTrap : TraderBase
     {
         private BitfinexApi _requestor;
 
         private string _cryptoCurrencyCode;
 
-        //LTC amount to trade
+        //Bitfinex returns error when trying to create an order with too small volume (TODO: isn't that ETH-specific?)
+        private const double MIN_ORDER_AMOUNT = 0.1;
+
+        //CRPTO amount to trade
         private double _operativeAmount;
         private double _minWallVolume;
         private double _maxWallVolume;
-        //Volumen of LTC necessary to accept our offer
+        //Volumen of CRPTO necessary to accept our offer
         private double _volumeWall;
         //Minimum difference between SELL price and subsequent BUY price (so we have at least some profit)
         private const double MIN_DIFFERENCE = 0.06;
         //Tolerance of SELL price (absolute value in USD). Usefull if possible price change is minor, to avoid frequent order updates.
-        private const double MIN_PRICE_DELTA = 0.02;    //2 cents per LTC
+        private const double MIN_PRICE_DELTA = 0.02;    //2 cents per CRPTO
 
         //Active SELL order ID
         private int _sellOrderId = -1;
@@ -52,7 +56,7 @@ namespace BitfinexBot
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
             _maxWallVolume = double.Parse(Configuration.GetValue("max_volume"));
             log(String.Format("Bitfinex Litecoin CBT trader initialized with operative={0}; MinWall={1}; MaxWall={2}", _operativeAmount, _minWallVolume, _maxWallVolume));
-            _requestor = new BitfinexApi(_logger);
+            _requestor = new BitfinexApi(_logger, MIN_ORDER_AMOUNT);
         }
 
 
@@ -123,7 +127,7 @@ namespace BitfinexBot
                         throw new Exception(message);
                 }
             }
-            else if (_operativeAmount - _buyOrderAmount > 0.00001)    //No SELL order (and there are some LTC available). So create one
+            else if (_operativeAmount - _buyOrderAmount > 0.00001)    //No SELL order (and there are some CRPTO available). So create one
             {
                 _sellOrderPrice = suggestSellPrice(market);
                 var amount = _operativeAmount - _buyOrderAmount;

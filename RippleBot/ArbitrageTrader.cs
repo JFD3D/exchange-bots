@@ -226,7 +226,7 @@ namespace RippleBot
             }
 
             //Change any extra XRP balance to a fiat. Any conversion is better than staying in XRP and potential loss of value.
-            if (_lastValidXrpBalance > 0.0 && xrpBalance - 2.0 > _lastValidXrpBalance)
+            if (_lastValidXrpBalance > 0.0 && xrpBalance - 3.0 > _lastValidXrpBalance)
             {
                 var amount = xrpBalance - _lastValidXrpBalance;
                 log("Balance {0:0.000} XRP is too high. Must convert {1:0.000} to fiat.", ConsoleColor.Yellow, xrpBalance, amount);

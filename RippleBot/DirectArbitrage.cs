@@ -204,7 +204,7 @@ namespace RippleBot
                     if (!_baseOrderPrice.eq(newPrice))
                     {
                         createBaseOrder(baseBalance, newPrice);
-                        log("Updated BASE order ID={0}; amount={1:0.0000} {2}.{3};", _baseOrderId, _baseOrderAmount, _baseAssetCode, _baseGatewayName);
+                        log("Updated BASE order ID={0}; price={1:0.0000};", _baseOrderId, newPrice);
                     }
                 }
             }
@@ -304,7 +304,7 @@ namespace RippleBot
                     if (!_arbOrderPrice.eq(newPrice))
                     {
                         createArbOrder(arbBalance, newPrice);
-                        log("Updated ARB order ID={0}; amount={1:0.0000} {2}.{3};", _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName);
+                        log("Updated ARB order ID={0}; price={1:0.0000};", _arbOrderId, newPrice);
                     }
                 }
             }

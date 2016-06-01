@@ -14,7 +14,11 @@ using RippleBot.Business.DataApi;
 
 namespace RippleBot
 {
-    internal class RippleApi //futile : IDisposable
+    /* TODO: this class is ripe for refactoring as business logic leaks here... or maybe whole system is.
+     *       I imagine something like state machine, i.e. every action (done by request) gets this into
+     *       a state that decides next action.
+     */
+    internal class RippleApi
     {
         private const int SOCKET_TIMEOUT = 12000;
         private string _dataApiUrl;
@@ -426,7 +430,7 @@ namespace RippleBot
 
                 var response = Helpers.DeserializeJSON<NewOrderResponse>(data);
 
-                if (ResponseKind.FatalError == response.result.ResponseKind)
+                if (ResponseKind.FatalError == response.result.ResponseKind)        //TODO: this checking logic is to generic to be in 'PlaceBuyOrder'. 
                 {
                     var message = String.Format("Error creating BUY order. Response={0} {1}", response.result.engine_result, response.result.engine_result_message);
                     _logger.AppendMessage(message, true, ConsoleColor.Yellow);
@@ -652,7 +656,9 @@ namespace RippleBot
 
             var data = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == data) //Socket problem
+            {
                 return false;
+            }
 
             //Check for error
             var error = Helpers.DeserializeJSON<ErrorResponse>(data);
@@ -780,10 +786,14 @@ namespace RippleBot
 
             var data = sendToRippleNet(Helpers.SerializeJson(command));
             if (null == data)
+            {
                 return null;
+            }
 
             if (!checkError("GetOrderInfo", data))
+            {
                 return null;
+            }
 
             //Because 'taker_gets' and 'taker_pays' can be of 2 types, do a tricky conversion (decimal to object) to ease further processing
             var dataFix = _offerPattern.Replace(data, "'taker_${verb}s': {'currency': 'XRP', 'issuer':'ripple labs', 'value': '${value}'}".Replace("'", "\""));
@@ -828,7 +838,9 @@ namespace RippleBot
             }
 
             if (!_open)
+            {
                 throw new InvalidOperationException("WebSocket not open");
+            }
 
             var duration = 0;
             while (null == _lastResponse)
@@ -891,60 +903,6 @@ namespace RippleBot
                 Init();
             }
         }
-
-/*TODO:delete
-        private string sendPostRequest(string method, string postData)
-        {
-            string address = CHARTS_BASE_URL + method;
-
-            WebException exc = null;
-            var delay = RETRY_DELAY;
-            for (int i = 1; i <= RETRY_COUNT; i++)
-            {
-                var webRequest = (HttpWebRequest)WebRequest.Create(address);
-                webRequest.ContentType = "application/json";
-                webRequest.Method = "POST";
-
-                if (null != _webProxy)
-                {
-                    webRequest.Proxy = _webProxy;
-                }
-
-                using (var writer = new StreamWriter(webRequest.GetRequestStream()))
-                {
-                    writer.Write(postData);
-                }
-
-                try
-                {
-                    using (WebResponse webResponse = webRequest.GetResponse())
-                    {
-                        using (Stream stream = webResponse.GetResponseStream())
-                        {
-                            using (StreamReader reader = new StreamReader(stream))
-                            {
-                                var text = reader.ReadToEnd();
-                                _logger.LastResponse = text;
-                                return text;
-                            }
-                        }
-                    }
-                }
-                catch (WebException we)
-                {
-                    var text = String.Format("(ATTEMPT {0}/{1}) Web request failed with exception={2}; status={3}. Retry in {4} ms",
-                                             i, RETRY_COUNT, we.Message, we.Status, delay);
-                    _logger.AppendMessage(text, true, ConsoleColor.Yellow);
-
-                    exc = we;
-                    Thread.Sleep(delay);
-                }
-                delay *= 2;
-            }
-
-            throw new Exception(String.Format("Web request failed {0} times in a row with error '{1}'. Giving up.", RETRY_COUNT, exc.Message));
-        }
-*/
         #endregion
     }
 }

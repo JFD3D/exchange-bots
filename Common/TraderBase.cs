@@ -6,7 +6,7 @@ namespace Common
 {
     public abstract class TraderBase : ITrader
     {
-        private int ERROR_RECOVERY_BREAK = 10 * 60 * 1000;        //10min after fatal exception to revive
+        private int ERROR_RECOVERY_BREAK = 4 * 60 * 1000;        //4 minutes after fatal exception to revive
         private bool _killSignal;
         private readonly bool _verbose = true;
         protected readonly Logger _logger;

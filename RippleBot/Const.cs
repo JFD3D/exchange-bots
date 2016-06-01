@@ -28,6 +28,7 @@ namespace RippleBot
             "tefPAST_SEQ",          //Message "This sequence number has already past", no idea what it means
             "terPRE_SEQ",           //Message "Missing/inapplicable prior transaction"
             "temBAD_SEQUENCE",      //Message "Malformed: Sequence is not in the past."
+            "terQUEUED",            //Message "Held until fee drops."
         };
     }
 }

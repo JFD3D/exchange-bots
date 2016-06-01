@@ -27,9 +27,13 @@ namespace RippleBot.Business
             get
             {
                 if (0 == engine_result_code)    //Success
+                {
                     return ResponseKind.Success;
+                }
                 if (Const.OkResultCodes.Contains(engine_result))
+                {
                     return ResponseKind.NonCriticalError;
+                }
                 return ResponseKind.FatalError;
             }
         }

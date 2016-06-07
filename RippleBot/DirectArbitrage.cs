@@ -58,6 +58,7 @@ namespace RippleBot
 
         protected override void Initialize()
         {
+            _counter = 0;
             _baseAssetCode = Configuration.GetValue("base_asset_code");
             _arbAssetCode = Configuration.GetValue("arbitrage_asset_code");
 

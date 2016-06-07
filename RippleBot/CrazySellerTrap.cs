@@ -58,6 +58,7 @@ namespace RippleBot
 
         protected override void Initialize()
         {
+            _counter = 0;
             _operativeAmount = double.Parse(Configuration.GetValue("operative_amount"));
             _minWallVolume = double.Parse(Configuration.GetValue("min_volume"));
             _maxWallVolume = double.Parse(Configuration.GetValue("max_volume"));

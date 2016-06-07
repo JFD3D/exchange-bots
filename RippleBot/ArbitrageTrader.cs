@@ -38,6 +38,7 @@ namespace RippleBot
 
         protected override void Initialize()
         {
+            _counter = 0;
             _baseCurrency = Configuration.GetValue("base_currency_code");
             _baseGateway = Configuration.GetValue("base_gateway_address");
 

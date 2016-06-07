@@ -97,6 +97,13 @@ namespace RippleBot
                 return;     //Happens sometimes after bad JSON parsing
             }
 
+            //Cancel abandoned ordes if needed
+            if (_counter % ZOMBIE_CHECK == 0)
+            {
+                _counter++;
+                _baseRequestor.CleanupZombies(-1, -1);
+            }
+
             //Trade from basic to arbitrage currency
             if (baseBalance >= 0.1)
             {
@@ -218,13 +225,6 @@ namespace RippleBot
                 }
             }
 
-            //Clear any dangling orders
-            if (++_counter == ZOMBIE_CHECK)
-            {
-                _counter = 0;
-                _baseRequestor.CleanupZombies(-1, -1);
-            }
-
             //Change any extra XRP balance to a fiat. Any conversion is better than staying in XRP and potential loss of value.
             if (_lastValidXrpBalance > 0.0 && xrpBalance - 3.0 > _lastValidXrpBalance)
             {
@@ -264,7 +264,7 @@ namespace RippleBot
                 _lastValidXrpBalance = xrpBalance;
             }
 
-            log(new string('=', 70));
+            log(new string('=', 74));
         }
 
         public override void Kill()

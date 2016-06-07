@@ -97,6 +97,13 @@ namespace RippleBot
             _intervalMs = Helpers.SuggestInterval(coef, 8000, 20000);
             log("Madness={0}; Volume={1} XRP; Interval={2} ms", coef, _volumeWall, _intervalMs);
 
+            //Cancel abandoned ordes if needed
+            if (_cleanup && _counter % ZOMBIE_CHECK == 0)
+            {
+                _counter++;
+                _requestor.CleanupZombies(_buyOrderId, _sellOrderId);
+            }
+
             //We have active SELL order
             if (-1 != _sellOrderId)
             {
@@ -270,12 +277,6 @@ namespace RippleBot
                     log("Successfully created BUY order with ID={0}; amount={1} XRP; price={2} {3}",
                         ConsoleColor.Cyan, _buyOrderId, _buyOrderAmount, _buyOrderPrice, _currencyCode);
                 }
-            }
-
-            if (_cleanup && ++_counter == ZOMBIE_CHECK)
-            {
-                _counter = 0;
-                _requestor.CleanupZombies(_buyOrderId, _sellOrderId);
             }
 
             _xrpBalance = _requestor.GetXrpBalance();

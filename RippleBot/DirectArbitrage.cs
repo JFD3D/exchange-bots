@@ -119,6 +119,13 @@ namespace RippleBot
                 return;
             }
 
+            //Cancel abandoned ordes if needed
+            if (_cleanup && _counter % ZOMBIE_CHECK == 0)
+            {
+                _counter++;
+                _baseRequestor.CleanupZombies(_baseOrderId, _arbOrderId);
+            }
+
             //We have active BASE sell order
             if (-1 != _baseOrderId)
             {
@@ -317,12 +324,6 @@ namespace RippleBot
                     log("Successfully created ARB order with ID={0}; amount={1:0.0000} {2}.{3}; price={4:0.0000} {5}.{6}", ConsoleColor.Cyan,
                         _arbOrderId, _arbOrderAmount, _arbAssetCode, _arbGatewayName, _arbOrderPrice, _baseAssetCode, _baseGatewayName);
                 }
-            }
-
-            if (_cleanup && ++_counter == ZOMBIE_CHECK)
-            {
-                _counter = 0;
-                _baseRequestor.CleanupZombies(_baseOrderId, _arbOrderId);
             }
 
             _lastBaseBalance = baseBalance;

@@ -42,7 +42,9 @@ namespace RippleBot.Business
             get
             {
                 if (String.IsNullOrEmpty(value))
+                {
                     return 0.0;
+                }
                 return double.Parse(value);
             }
         }

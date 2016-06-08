@@ -121,9 +121,8 @@ namespace RippleBot
             }
 
             //Cancel abandoned ordes if needed
-            if (_cleanup && _counter % ZOMBIE_CHECK == 0)
+            if (_cleanup && _counter++ % ZOMBIE_CHECK == 0)
             {
-                _counter++;
                 _baseRequestor.CleanupZombies(_baseOrderId, _arbOrderId);
             }
 

@@ -106,9 +106,8 @@ namespace RippleBot
             log("Madness={0}; Volume={1} XRP; Interval={2} ms", coef, _volumeWall, _intervalMs);
 
             //Cancel abandoned ordes if needed
-            if (_cleanup && _counter % ZOMBIE_CHECK == 0)
+            if (_cleanup && _counter++ % ZOMBIE_CHECK == 0)
             {
-                _counter++;
                 _requestor.CleanupZombies(_buyOrderId, _sellOrderId);
             }
 
